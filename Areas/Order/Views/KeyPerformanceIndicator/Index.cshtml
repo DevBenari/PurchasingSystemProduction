@@ -1,0 +1,646 @@
+﻿@using PurchasingSystemProduction.Areas.MasterData.ViewModels;
+
+@{
+    ViewData["Title"] = "Key Perfomance Indikator";
+    //Layout = "~/Views/Shared/_TopNavbarOrder.cshtml";
+    var photoPath = "~/UserPhoto/" + (Model.UserPhotoPath ?? "user.jpg");
+}
+
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
+@model UserActiveViewModel
+
+<!-- Main content -->
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Widget: user widget style 1 -->
+            <div class="card card-widget widget-user">
+                <!-- Add the bg color to the header using any of the bg-* classes -->
+                <div class="widget-user-header bg-info">
+                    <h1 class="widget-user-username"><b>@ViewBag.Title</b></h1>
+                </div>
+            </div>
+            <!-- /.widget-user -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 d-flex align-items-stretch flex-column">
+            <div class="card bg-light d-flex flex-fill">
+                <div class="card-body pt-0">
+                    <div class="row">
+                        <div class="col-5 text-center" style="margin-top: 15px;">
+                            <img src="@photoPath" asp-append-version="true" width="100%" height="100%" alt="user-avatar" class="img-circle img-fluid" />
+                        </div>
+                        <div class="col-7" style="margin-top: 15px;">
+                            <h2 class="lead text-center" style="margin-top: 20px;"><b>@(User.FindFirst("UserNamaDepan").Value)</b></h2>
+                            <p class="text-center">Sofware Development</p>
+                            <button type="button" class="btn btn-block btn-warning text-center" style="margin-top: -5%;">IT Departement</button>
+                            <div class="form-group" style="margin-top: 3%;" id="formSelected">
+                                <select class="form-control select2" style="width: 100%;" id="selected">
+                                    <option selected="true" value="null" disabled="disabled">-- Performance By --</option>
+                                    <option value="year">Yearly</option>
+                                    <option value="month">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col">
+                        <div class="container">
+                            <div class="inner">
+                                <div class="rating">
+                                    <span class="rating-num">4.0</span>
+                                    <div class="rating-stars">
+                                        <span><i class="fa-solid fa-star active"></i></span>
+                                        <span><i class="fa-solid fa-star active"></i></span>
+                                        <span><i class="fa-solid fa-star active"></i></span>
+                                        <span><i class="fa-solid fa-star active"></i></span>
+                                        <span><i class="fa-solid fa-star"></i></span>
+                                    </div>
+                                    <div class=" rating-users text-center">
+                                        <div class="justify-content-center">
+                                            <i class="fa-solid fa-file-signature"></i>&nbsp;<span id="total-task"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="histo">
+                                    <div class="five histo-rate">
+                                        <span class="histo-star">
+                                            <i class="fa-solid fa-star active"></i> 5
+                                        </span>
+                                        <span class="bar-block">
+                                            <span id="bar-five" class="bar">
+                                                <span class="text-absolute">566,784</span>&nbsp;
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div class="four histo-rate">
+                                        <span class="histo-star">
+                                            <i class="fa-solid fa-star active"></i> 4
+                                        </span>
+                                        <span class="bar-block">
+                                            <span id="bar-four" class="bar">
+                                                <span class="text-absolute">171,298</span>&nbsp;
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div class="three histo-rate">
+                                        <span class="histo-star">
+                                            <i class="fa-solid fa-star active"></i> 3
+                                        </span>
+                                        <span class="bar-block">
+                                            <span id="bar-three" class="bar">
+                                                <span class="text-absolute">94,940</span>&nbsp;
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div class="two histo-rate">
+                                        <span class="histo-star">
+                                            <i class="fa-solid fa-star active"></i> 2
+                                        </span>
+                                        <span class="bar-block">
+                                            <span id="bar-two" class="bar">
+                                                <span class="text-absolute">44,525</span>&nbsp;
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div class="one histo-rate">
+                                        <span class="histo-star">
+                                            <i class="fa-solid fa-star active"></i> 1
+                                        </span>
+                                        <span class="bar-block">
+                                            <span id="bar-one" class="bar">
+                                                <span class="text-absolute">136,457</span>&nbsp;
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"> <i class="fa-solid fa-file-pen"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>PR Created</b></span> <span class="info-box-number" id="data_created"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-primary created"></div>
+                    </div>
+                    <span class="progress-description" id="desc_created">
+                        The PR You Was Created
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"> <i class="fa-solid fa-file-circle-question"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>Waiting Approval</b> </span> <span class="info-box-number" id="data_waiting"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-warning waiting"></div>
+                    </div>
+                    <span class="progress-description" id="desc_waiting">
+
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"> <i class="fa-solid fa-file-circle-check"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>PR Approved</b></span> <span class="info-box-number" id="data_approved"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success approved"></div>
+                    </div>
+                    <span class="progress-description" id="desc_approved">
+
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"> <i class="fa-solid fa-file-circle-xmark"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>PR Rejected</b></span> <span class="info-box-number" id="data_rejected"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-danger rejected"></div>
+                    </div>
+                    <span class="progress-description" id="desc_rejected">
+
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"><i class="fa-solid fa-box-archive"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>PO Created</b></span> <span class="info-box-number" id="data_po"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-info po"></div>
+                    </div>
+                    <span class="progress-description" id="desc_po">
+
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+        <div class="col-md-2 col-sm-4 col-12">
+            <div class="info-box">
+                <span class="info-box-icon"><i class="fa-solid fa-box-open"></i> </span>
+                <div class="info-box-content">
+                    <span class="info-box-text"><b>PO Received</b></span> <span class="info-box-number" id="data_completed"></span>
+                    <div class="progress mb-2" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar completed" style="background-color: darkblue"></div>
+                    </div>
+                    <span class="progress-description" id="desc_completed">
+
+                    </span>
+                </div> <!-- /.info-box-content -->
+            </div> <!-- /.info-box -->
+        </div> <!-- /.col -->
+    </div>
+    <div class="row">
+        <div class="col-sm-9">
+            <div class="card">
+                <div class="card-body">
+                    @*  <h4 class="border-bottom">Approved Performance Monthly</h4> *@
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="card">
+                <div class="card-body">
+                    @*  <h4 class="border-bottom">Approved Performance Monthly</h4> *@
+                    <div id="chartCircle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+<style>
+    <link media="screen" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400" / >
+
+    .card-body {
+        font-family: 'Roboto', Helvetica;
+        color: #737373;
+        font-weight: 300;
+    }
+
+    .container {
+        /* width: 400px; */
+        /* margin: 0 auto; */
+        /* margin-top: 3em; */
+        background-color: #EFEFEF;
+        padding: 4px;
+    }
+
+    .inner {
+        padding: 1em;
+        background-color: white;
+        overflow: hidden;
+        /* position: relative; */
+        /* -webkit-border-radius: 4px;  */
+        /* -moz-border-radius: 4px;  */
+        /* border-radius: 4px;  */
+    }
+
+    .rating {
+        float: left; /* menentukan posisi class rating */
+        width: 45%;
+        margin-right: 5%;
+        text-align: center;
+    }
+
+    .rating-num {
+        color: #333333;
+        font-size: 72px;
+        font-weight: 100;
+        line-height: 1em;
+    }
+
+    .rating-stars {
+        font-size: 20px;
+        color: #E3E3E3;
+        margin-bottom: .5em;
+    }
+
+        .rating-stars .active {
+            color: #737373;
+        }
+
+    .rating-users {
+        font-size: 14px;
+    }
+
+    .histo {
+        float: right;
+        width: 50%;
+        font-size: 13px;
+    }
+
+    .histo-star {
+        float: left;
+        padding: 3px;
+    }
+
+    .histo-rate {
+        width: 100%;
+        /* display: inline-block; */
+        clear: both;
+    }
+
+    .bar-block {
+        margin-left: 5px;
+        /* color: black; */
+        /* display: block; */
+        float: left;
+        width: 75%;
+        /* position: relative; */
+    }
+
+    .bar {
+        padding: 4px;
+        display: block;
+    }
+
+    .text-absolute {
+        position: absolute;
+    }
+
+    #bar-five {
+        width: 0;
+        background-color: #9FC05A;
+    }
+
+    #bar-four {
+        width: 0;
+        background-color: #ADD633;
+    }
+
+    #bar-three {
+        width: 0;
+        background-color: #FFD834;
+    }
+
+    #bar-two {
+        width: 0;
+        background-color: #FFB234;
+    }
+
+    #bar-one {
+        width: 0;
+        background-color: #FF8B5A;
+    }
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js" integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        show_data();
+        show_rate();
+        chartBarLine();
+        dataSelected();
+    });
+
+    function dataSelected() {
+        $('.select2').on('change', function () {
+            let select = $(this).val();
+            show_data(select);
+            show_rate(select);
+            chartBarLine(select);
+        });
+    }
+
+    function show_data(selected) {
+        $.post('@Url.Action("PostData")', { FirstName: selected }, function (r) {
+
+            // CREATED CARD
+            let dataPurchaseRequest = r.dataPurchaseRequest;
+            let dataCreated = r.dataCreated;
+
+            let textCreated = dataCreated + "/" + dataPurchaseRequest;
+            const percentCreated = ((dataCreated / dataPurchaseRequest) * 100).toFixed() + "%";
+            $('#data_created').text(textCreated);
+            $('.created').width(percentCreated);
+            $('#desc_created').text(percentCreated + " PR Created");
+
+            // WAITING APPROVAL CARD
+            let dataWaiting = r.dataWaiting;
+            let dataCountApp = r.dataCountApproval;
+
+            let textWaiting = dataWaiting + "/" + dataCountApp;
+            const percentWaiting = ((dataWaiting / dataCountApp) * 100).toFixed() + "%";
+            $('#data_waiting').text(textWaiting);
+            $('.waiting').width(percentWaiting);
+            $('#desc_waiting').text(percentWaiting + " PR Waiting Approved");
+
+            // CARD APPROVED
+            let dataApproved = r.dataApproved;
+
+            let textApproved = dataApproved + "/" + dataCountApp;
+            const percentApproved = ((dataApproved / dataCountApp) * 100).toFixed() + "%";
+            $('#data_approved').text(textApproved);
+            $('.approved').width(percentApproved);
+            $('#desc_approved').text(percentApproved + " PR Was Approved");
+
+            // CARD REJECTED
+            let dataRejected = r.dataRejected;
+
+            let textRejected = dataRejected + "/" + dataCountApp;
+            const percentRejected = ((dataRejected / dataCountApp) * 100).toFixed() + "%";
+            $('#data_rejected').text(textRejected);
+            $('.rejected').width(percentRejected);
+            $('#desc_rejected').text(percentRejected + " PR Was Rejected");
+
+            // CARD PR BECOME PO
+            let dataPurchaseOrder = r.dataPurchaseOrder;
+
+            let textPO = dataPurchaseOrder + "/" + dataCountApp;
+            const percentPO = ((dataPurchaseOrder / dataCountApp) * 100).toFixed() + "%";
+            $('#data_po').text(textPO);
+            $('.po').width(percentPO);
+            $('#desc_po').text(percentPO + " PR Has Been PO");
+
+            // CARD PO COMPLETED
+            let dataCompleted = r.dataCompleted;
+
+            let textCompleted = dataCompleted + "/" + dataCountApp;
+            const percentCompleted = ((dataCompleted / dataCountApp) * 100).toFixed() + "%";
+            $('#data_completed').text(textCompleted);
+            $('.completed').width(percentCompleted);
+            $('#desc_completed').text(percentCompleted + " PO Completed");
+
+            let total_task = dataCreated + " Created PO dan " + dataCountApp + " Approval Terkoneksi dari " + dataPurchaseRequest + " Total Data";
+            $('#total-task').text(total_task);
+
+            $("#chartCircle").empty();
+
+            var options = {
+                series: [dataCreated, dataWaiting, dataApproved, dataRejected],
+                chart: {
+                    height: 397,
+                    type: 'pie',
+                },
+                labels: ["Created PR", "Waiting Approval", "Approved", "Rejected"],
+                colors: ["#007bff", "#ffe35f", "#28a745", "#FF0000"],
+                // colors: ["#1ab7ea", "#0084ff", "#39539E", "#0077B5"],
+                legend: {
+                    show: true,
+                    showForSingleSeries: false,
+                    showForNullSeries: true,
+                    showForZeroSeries: true,
+                    position: 'bottom',
+                    horizontalAlign: 'center',
+                    fontSize: '13px',
+                    fontFamily: 'Helvetica, Arial',
+                    fontWeight: 200,
+                    itemMargin: {
+                        horizontal: 15,
+                        vertical: 0
+                    },
+                },
+                responsive: [{
+                    breakpoint: 397,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                    }
+                }]
+            };
+            var chart = new ApexCharts(document.querySelector("#chartCircle"), options);
+            chart.render();
+
+
+        });
+    }
+
+    function show_rate(selected) {
+        $.post('@Url.Action("KpiJson")', { FirstName: selected }, function (r) {
+            let data = r.data;
+            let fiveStar = r.fiveStar;
+            let fourStar = r.fourStar;
+            let threeStar = r.threeStar;
+            let twoStar = r.twoStar;
+            let oneStar = r.oneStar;
+            let starClass = "";
+
+            const percentFiveStar = ((fiveStar / data) * 100) + '%';
+            const percentFourStar = ((fourStar / data) * 100) + '%';
+            const percentThreeStar = ((threeStar / data) * 100) + '%';
+            const percentTwoStar = ((twoStar / data) * 100) + '%';
+            const percentOneStar = ((oneStar / data) * 100) + '%';
+
+            const paramFiveStar = (fiveStar * 5);
+            const paramFourStar = (fourStar * 4);
+            const paramThreeStar = (threeStar * 3);
+            const paramTwoStar = (twoStar * 2);
+            const paramOneStar = (oneStar * 1);
+            const grandTotalParam = (paramFiveStar + paramFourStar + paramThreeStar + paramTwoStar + paramOneStar);
+            const totalParam = (fiveStar + fourStar + threeStar + twoStar + oneStar);
+            const paramResult = Math.round(grandTotalParam / totalParam) + '.0';
+
+            $('#text-5').text('Approve Sebelum Expired: ' + fiveStar);
+            $('#text-4').text('Approve Saat Expired: ' + fourStar);
+            $('#text-3').text('PO yang Selesai: ' + threeStar);
+            $('#text-2').text('Approve Lebih dari 14 Hari: ' + twoStar);
+            $('#text-1').text('Approve Lebih dari sebulan: ' + oneStar);
+            $('#rating-num').text(paramResult);
+            if (paramResult == '5.0') {
+                starClass += '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span> <i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>';
+                $('#star-class').html(starClass);
+            } else if (paramResult == '4.0') {
+                starClass += '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span> <i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>';
+                $('#star-class').html(starClass);
+            } else if (paramResult == '3.0') {
+                starClass += '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span> <i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>';
+                $('#star-class').html(starClass);
+            } else if (paramResult == '2.0') {
+                starClass += '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span> <i class="fa-solid fa-star active"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>';
+                $('#star-class').html(starClass);
+            } else {
+                starClass += '<span><i class="fa-solid fa-star active"></i></span>' +
+                    '<span> <i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>' +
+                    '<span><i class="fa-solid fa-star"></i></span>';
+                $('#star-class').html(starClass);
+            }
+
+            $('.bar span').hide();
+            // console.log(r);
+            $('#bar-five').animate({
+                width: percentFiveStar
+            }, 1000);
+            $('#bar-four').animate({
+                width: percentFourStar
+            }, 1000);
+            $('#bar-three').animate({
+                width: percentThreeStar
+            }, 1000);
+            $('#bar-two').animate({
+                width: percentTwoStar
+            }, 1000);
+            $('#bar-one').animate({
+                width: percentOneStar
+            }, 1000);
+
+            setTimeout(function () {
+                $('.bar span').fadeIn('slow');
+            }, 1000);
+        })
+    }
+
+    function chartBarLine(selected) {
+        $.post('@Url.Action("PostData")', { FirstName: selected }, function (r) {
+            // console.log(r);
+            let a = r.beforeExpired || [];
+            let b = r.moreThanExpired || [];
+            let merged = [];
+            let theMonths = [];
+            let beforeExpired = [];
+            let afterExpired = [];
+            console.log(theMonths, beforeExpired, afterExpired);
+
+            for (let i = 0; i < a.length; i++) {
+                const bData = b.find((itmInner) => itmInner.months === a[i].months) || { afterExpired: 0 };
+                merged.push({ ...a[i], ...bData });
+            }
+
+            for (let i = 0; i < merged.length; i++) {
+                let afterEx = merged[i].afterExpired || 0;
+                let beforeEx = merged[i].beforeExpired || 0;
+
+                theMonths.push(merged[i].months);
+                beforeExpired.push(beforeEx);
+                afterExpired.push(afterEx);
+
+            }
+
+            $("#chart").empty();
+
+            var options = {
+                series: [{
+                    name: 'Sebelum Expired Date',
+                    type: 'column',
+                    data: beforeExpired
+                }, {
+                    name: 'Sesudah Expired Date',
+                    type: 'line',
+                    data: afterExpired
+                }],
+                colors: ['#008FFB', '#FF0000'],
+                chart: {
+                    height: 350,
+                    type: 'line',
+                },
+                stroke: {
+                    width: [0, 4]
+                },
+                title: {
+                    text: 'Approval Performances'
+                },
+                dataLabels: {
+                    enabled: true,
+                    enabledOnSeries: [1]
+                },
+                labels: theMonths,
+                yaxis: [{
+                    title: {
+                        text: 'Sebelum Expired Date',
+                    },
+
+                }, {
+                    opposite: true,
+                    title: {
+                        text: 'Sesudah Expired Date'
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+        })
+    }
+</script>
+<!-- /.content -->

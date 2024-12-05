@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var listRole = Context.Session.GetString("ListRole");
+}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+</head>
+<body>
+    <section class="content">
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#347FC4">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+                    <ul class="navbar-nav">
+                        @if (User.Identity.Name == "superadmin@admin.com")
+                        {                            
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Dashboard", new { area = "MasterData" })">
+                                    Dashboard
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "GroupRole", new { area = "MasterData" })">
+                                    Role
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Users</button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "UserActive", new { area = "MasterData" })">User</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Position", new { area = "MasterData" })">Position</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Department", new { area = "MasterData" })">Department</div></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Supplier</button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Supplier", new { area = "MasterData" })">Supplier PKS</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToNonPks", "Supplier", new { area = "MasterData" })">Supplier Non-PKS</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToNonActive", "Supplier", new { area = "MasterData" })">Supplier Non-Active</div></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Product</button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Product", new { area = "MasterData" })">Product</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Category", new { area = "MasterData" })">Category</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Measurement", new { area = "MasterData" })">Measurement</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Discount", new { area = "MasterData" })">Discount</div></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "TermOfPayment", new { area = "MasterData" })">
+                                    Term Of Payment
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Bank", new { area = "MasterData" })">
+                                    Bank
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Warehouse</button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "WarehouseLocation", new { area = "MasterData" })">Warehouse Location</div></li>
+                                    <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "UnitLocation", new { area = "MasterData" })">Unit Location</div></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "LeadTime", new { area = "MasterData" })">
+                                    Lead Time
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "InitialStock", new { area = "MasterData" })">
+                                    Calculate Min-Max Stock
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Api", new { area = "MasterData" })">
+                                    Get Data API
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(listRole))
+                            {
+                                var roles = listRole.Split(',');
+                                if (roles.Contains("Dashboard"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Dashboard", new { area = "MasterData" })">
+                                            Dashboard
+                                        </div>
+                                    </li>
+                                }
+                                @if (roles.Contains("GroupRole"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "GroupRole", new { area = "MasterData" })">
+                                            Role
+                                        </div>
+                                    </li>
+                                }
+                                @if (roles.Any(role => role == "UserActive" || role == "Position" || role == "Department"))
+                                {
+                                    <li class="nav-item dropdown">
+                                        <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Users</button>
+                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                            @if (roles.Contains("UserActive"))
+                                            {
+                                                <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "UserActive", new { area = "MasterData" })">User</div></li>
+                                            }
+                                            @if (roles.Contains("Position"))
+                                            {
+                                                <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Position", new { area = "MasterData" })">Position</div></li>
+                                            }
+                                            @if (roles.Contains("Department"))
+                                            {
+                                                <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Department", new { area = "MasterData" })">Department</div></li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+
+                                if (roles.Contains("Supplier"))
+                                {
+                                    <li class="nav-item dropdown">
+                                        <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Supplier</button>
+                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Supplier", new { area = "MasterData" })">Supplier PKS</div></li>
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToNonPks", "Supplier", new { area = "MasterData" })">Supplier Non-PKS</div></li>
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToNonActive", "Supplier", new { area = "MasterData" })">Supplier Non-Active</div></li>
+                                        </ul>
+                                    </li>
+                                }
+                                @if (roles.Any(role => role == "Product" || role == "Category" || role == "Measurement" || role == "Discount"))
+                                {
+                                    <li class="nav-item dropdown">
+                                        <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Product</button>
+                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                            @if (roles.Contains("Product"))
+                                            {
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Product", new { area = "MasterData" })">Product</div></li>
+                                            }
+                                            @if (roles.Contains("Category"))
+                                            {
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Category", new { area = "MasterData" })">Category</div></li>
+                                            }
+                                            @if (roles.Contains("Measurement"))
+                                            {
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Measurement", new { area = "MasterData" })">Measurement</div></li>
+                                            }
+                                            @if (roles.Contains("Discount"))
+                                            {
+                                                <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "Discount", new { area = "MasterData" })">Discount</div></li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                                if (roles.Contains("TermOfPayment"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "TermOfPayment", new { area = "MasterData" })">
+                                            Term Of Payment
+                                        </div>
+                                    </li>
+                                }
+                                if (roles.Contains("Bank"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Bank", new { area = "MasterData" })">
+                                            Bank
+                                        </div>
+                                    </li>
+                                }
+                                @if (roles.Any(role => role == "WarehouseLocation" || role == "UnitLocation"))
+                                {
+                                    <li class="nav-item dropdown">
+                                        <button class="btn btn-orange dropdown-toggle" style="color:#ffffff" data-bs-toggle="dropdown" aria-expanded="false">Warehouse</button>
+                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "WarehouseLocation", new { area = "MasterData" })">Warehouse Location</div></li>
+                                            <li><div class="dropdown-item cursor-pointer" data-href="@Url.Action("RedirectToIndex", "UnitLocation", new { area = "MasterData" })">Unit Location</div></li>
+                                        </ul>
+                                    </li>
+                                }
+                                if (roles.Contains("LeadTime"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "LeadTime", new { area = "MasterData" })">
+                                            Lead Time
+                                        </div>
+                                    </li>
+                                }
+                                if (roles.Contains("InitialStock"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "InitialStock", new { area = "MasterData" })">
+                                            Calculate Min-Max Stock
+                                        </div>
+                                    </li>
+                                }
+                                if (roles.Contains("Api"))
+                                {
+                                    <li class="nav-item">
+                                        <div class="btn btn-orange" style="color:#ffffff" data-href="@Url.Action("RedirectToIndex", "Api", new { area = "MasterData" })">
+                                            Get Data API
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        }                        
+                    </ul>
+                </div>
+            </div>
+        </nav>        
+        @RenderBody()
+    </section>    
+    @if (IsSectionDefined("Scripts"))
+    {
+        @RenderSection("Scripts", required: true)
+    }
+    @section Scripts {
+        <style>
+            .cursor-pointer {                
+                cursor: pointer; /* Tambahkan ini untuk mengubah kursor */
+            }
+        </style>
+
+        <script>
+            //Start Pengaturan Click Pada Button DIV Index
+            document.addEventListener("DOMContentLoaded", () => {
+                const rows = document.querySelectorAll("div[data-href]");
+
+                rows.forEach(row => {
+                    row.addEventListener("click", () => {
+                        window.location.href = row.dataset.href;
+                    });
+                });
+            });
+            //End Pengaturan Click Pada Button DIV Index
+        </script>
+    }
+</body>
+</html>

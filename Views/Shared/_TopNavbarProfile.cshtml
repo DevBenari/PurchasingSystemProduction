@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+</head>
+<body>
+    <section class="content">
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-12">
+                <!-- Widget: user widget style 1 -->
+                <div class="card card-widget widget-user">
+                    <!-- Add the bg color to the header using any of the bg-* classes -->
+                    <div class="widget-user-header bg-info">
+                        <h1 class="widget-user-username"><b>@ViewBag.Title</b></h1>
+                        @*<h5 class="widget-user-desc">Founder & CEO</h5>*@
+                    </div>
+                    <div class="widget-user-image">
+                        @*<img class="img-circle elevation-2" src="../dist/img/user1-128x128.jpg" alt="User Avatar">*@
+                    </div>
+                </div>
+                <!-- /.widget-user -->
+            </div>
+        </div>
+        <!-- /.row -->
+        @RenderBody()
+    </section>
+    @if (IsSectionDefined("Scripts"))
+    {
+        @RenderSection("Scripts", required: true)
+    }
+</body>
+</html>

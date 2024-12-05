@@ -1,0 +1,301 @@
+﻿@using PurchasingSystemProduction.Areas.MasterData.ViewModels;
+
+@{
+    Layout = "~/Views/Shared/_TopNavbarProfile.cshtml";
+    var photoPath = "~/UserPhoto/" + (Model.UserPhotoPath ?? "user.jpg");
+}
+
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
+@model UserActiveViewModel
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="card-profile col-md-3 bg-white rounded">
+            <div class="text-center m-3 p-2 d-flex flex-column justify-content-center align-items-center position-relative  d-inline-block">
+                <img src="@photoPath" asp-append-version="true" class="shadow-lg mb-5 bg-white rounded-circle " style=" width: 200px;height: 200px; object-fit: cover; border-radius: 50%;" />
+             </div>
+            <ul class="list-group list-group-unbordered mb-3 mt-5 px-2">
+                <li class="list-group">
+                    <p class="card-title fw-bold mb-1">@Html.DisplayFor(m => m.FullName)</p>
+                </li>
+                <li class="list-group-item">
+                    <b>Department</b> <a class="float-right">@Html.DisplayFor(x => x.Department)</a>
+                </li>
+                <li class="list-group-item">
+                    <b>Position</b> <a class="float-right">@Html.DisplayFor(s => s.Position)</a>
+                </li>
+            </ul>
+            <div id="buttonEdits" class="d-flex flex-row justify-content-between" style="gap:5px; margin:10px;">
+                <!--Button changes Photos-->
+                <button type="button" class="btn btn-sm btn-primary p-2" style="right:20px;" id="btnEdit" onclick="document.getElementById('photoInput').click(); ">
+                    Changes Photo
+                </button>
+                <form id="photoForm" asp-action="MyProfile" asp-controller="Home" enctype="multipart/form-data" method="post">
+                    <input type="file" id="photoInput" name="Foto" style="display: none;" accept=".jpg, .jpeg, .png, .gif" onchange="validateAndPreviewImage(this)" />
+                    <input type="hidden" asp-for="UserActiveId" value="@Model.UserActiveId" />
+                    
+                </form>
+                @if (TempData["Message"] != null)
+                {
+                    <script type="text/javascript">
+                        window.onload = function () {
+                            swal("Success", '@TempData["Message"]', "success");
+                        };
+                    </script>
+                }
+                <!--End Button changes Photos-->
+
+
+                <button type="button" class="btn btn-sm btn-primary p-2" data-toggle="modal" data-target="#changePassword">
+                    Changes Password
+                </button>
+                <!-- Modal Change Password -->
+                <div class="modal fade rounded" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editProfileModalLabel">Change Password</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="ChangePasswordForm" method="post" asp-action="ResetPassword" asp-controller="Home">
+                                    <div class="form-group">
+                                        <label for="Password">New Password</label>
+                                        <input type="password" class="form-control" name="NewPassword" id="password" placeholder="New Password" required>
+                                        <div class="input-group-append position-absolute" style="right:20px; margin-top:-34px;">
+                                            <span class="input-group-text bg-white border-0" id="togglePassword" style="cursor: pointer;">
+                                                <i class="fas fa-eye-slash" id="eyeIcon"></i>
+                                            </span>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            must enter one capital letter, number and symbol
+                                        </small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ConfirmPassword">Confirm Password</label>
+                                        <input type="password" class="form-control" name="ConfirmPassword" id="confirmPassword" placeholder="Confirm New Password" required>
+                                        <div class="input-group-append position-absolute" style="right:20px; margin-top:-34px;">
+                                            <span class="input-group-text bg-white border-0" id="toggleConfirmPassword" style="cursor: pointer;">
+                                                <i class="fas fa-eye-slash" id="confirmEyeIcon"></i>
+                                            </span>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            must enter one capital letter, number and symbol
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </form>
+                                @if (TempData["MessageSuccess"] != null)
+                                {
+                                    <script type="text/javascript">
+                                        window.onload = function () {
+                                            swal("Notification", '@TempData["MessageSuccess"]', "success");
+                                        };
+                                    </script>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Modal -->
+            </div>
+        </div>
+
+        <div class="col-md-9 bg-white" style="height:100vh;">
+            <form enctype="multipart/form-data" asp-controller="Home" asp-action="MyProfile" method="post" class="form-horizontal">
+                <div class="card-body">
+                    <input hidden asp-for="UserActiveId" />
+                    <input hidden asp-for="UserPhotoPath" />
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="UserActiveCode">User Code</label>
+                        <div class="col-sm-10">
+                            <input type="text" asp-for="UserActiveCode" class="form-control form-control-border border-width-2" style="background-color:white;" id="useractivecode" placeholder="User Active Code" readonly disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="FullName">FullName</label>
+                        <div class="col-sm-10">
+                            <input maxlength="100" autocomplete="off" type="text" asp-for="FullName" class="form-control form-control-border border-width-2" style="background-color:white;" id="FullName" placeholder="FullName" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row d-flex align-items-center">
+                        <label class="col-sm-2 col-form-label" asp-for="IdentityNumber">Identity Number</label>
+                        <div class="col-sm-10 input-group nowrap-group">
+                            <div class="input-group-prepend align-items-center border-none">
+                                <span class="p-2 input-group-text d-flex align-items-center justify-content-center p-0" style="height: 100%;">
+                                    <i class="fas fa-id-badge"></i>
+                                </span>
+                            </div>
+                            <input id="IdentityNumber" placeholder="Identity Number" type="text" asp-for="IdentityNumber"
+                                   class="form-control form-control-border border-width-2" style="background-color:white;"
+                                   data-inputmask='"mask": "9999999999999999"' data-mask-identitas disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="PlaceOfBirth">Place Of Birth</label>
+                        <div class="col-sm-10">
+                            <input maxlength="100" autocomplete="off" type="text" asp-for="PlaceOfBirth" class="form-control form-control-border border-width-2" style="background-color:white;" id="PlaceOfBirth" placeholder="Place Of Birth" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="DateOfBirth">Date Of Birth</label>
+                        <div class="col-sm-10 input-group date" id="tanggallahir" data-target-input="nearest">
+                            <div class="input-group-append" data-target="#tanggallahir" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                            <input asp-for="DateOfBirth" type="text" class="form-control datetimepicker-input" style="background-color:white;" data-target="#tanggallahir" id="DateOfBirth" placeholder="Date Of Birth" disabled />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="Gender">Gender</label>
+                        <div class="col-sm-10">
+                            <select asp-for="Gender" class="form-control  select2bs4" style="width: 100%; background-color:white;" id="Gender" disabled>
+                                <option value="" hidden disabled selected>--Chioce Gender--</option>
+                                <option value="Laki-Laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="Address">Address</label>
+                        <div class="col-sm-10">
+                            <input maxlength="100" autocomplete="off" type="text" asp-for="Address" class="form-control form-control-border border-width-2" style="background-color:white;" id="Address" placeholder="Address" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="Handphone">Handphone</label>
+                        <div class="col-sm-10 input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            </div>
+                            <input asp-for="Handphone" autocomplete="off" type="text" class="form-control form-control-border border-width-2" style="background-color:white;" id="Handphone" data-inputmask='"mask": "(9999) - 9999-9999-9"' data-mask-hp disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" asp-for="Email">Email</label>
+                        <div class="col-sm-10 input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            </div>
+                            <input maxlength="100" autofocus autocomplete="off" asp-for="Email" type="email" class="form-control form-control-border border-width-2" style="background-color:white;" id="Email" placeholder="Email" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                @section Scripts {
+                    <script>
+                        $(function () {
+                            //Initialize Select2 Elements
+                            $('.select2bs4').select2({
+                                theme: 'bootstrap4'
+                            })
+                        })
+                    </script>
+
+                    <script>
+                        $(function () {
+                            //Data-Mask-Identitas
+                            $('[data-mask-identitas]').inputmask()
+
+                            //Data-Mask-Hp
+                            $('[data-mask-hp]').inputmask()
+
+                            //Tanggal Lahir
+                            $('#tanggallahir').datetimepicker({
+                                format: 'DD/MM/yyyy'
+                            })
+                        })
+                    </script>
+
+                    <script>
+                        function validateAndPreviewImage(input) {
+                            const file = input.files[0];
+                            const fileSize = file.size / 1024 / 1024; // Size in MB
+                            const allowedSize = 2; // Maximum allowed size in MB
+
+                            if (fileSize > allowedSize) {
+                                swal({
+                                    title: "Ukuran file melebihi 2MB !!",
+                                    text: " Silakan unggah file yang lebih kecil.",
+                                    type: "warning",
+                                    dangerMode: true,
+                                });
+                                input.value = '';
+                            }else{
+                                swal({
+                                    title: "Are you sure you want to change your photo?",
+                                    text: "Do you want to update your profile photo?",
+                                    type: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#3085d6',
+                                    cancelButtonColor: '#d33',
+                                    confirmButtonText: 'Yes, update it!',
+                                    cancelButtonText: 'No, cancel'
+                                }).then(function () {
+                                    document.getElementById('photoForm').submit();
+                                }, function (dismiss) {
+                                    if (dismiss === "cancel") {
+                                        swal({
+                                            title: "Session Berakhir",
+                                            text: "Session Anda telah berakhir",
+                                            type: "error",
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        });
+                                    }
+                                });
+                            }         
+                        }
+                    </script>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            // toggle untuk change password to text in field password
+                            document.getElementById("togglePassword").addEventListener("click", function () {
+                                const passwordField = document.getElementById("password");
+                                const eyeIcon = document.getElementById("eyeIcon");
+                                if (passwordField.type === "password") {
+                                    passwordField.type = "text";
+                                    eyeIcon.classList.remove("fa-eye-slash");
+                                    eyeIcon.classList.add("fa-eye");
+                                } else {
+                                    passwordField.type = "password";
+                                    eyeIcon.classList.remove("fa-eye");
+                                    eyeIcon.classList.add("fa-eye-slash");
+                                }
+                            });
+
+                            // toggle untuk change password to text in field Confirmpassword
+                            document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
+                                const confirmPasswordField = document.getElementById("confirmPassword");
+                                const confirmEyeIcons = document.getElementById("confirmEyeIcon");
+                                if(confirmPasswordField.type === "password"){
+                                   confirmPasswordField.type = "text";
+                                    confirmEyeIcons.classList.remove("fa-eye-slash");
+                                    confirmEyeIcons.classList.add("fa-eye");
+                                } else {
+                                    confirmPasswordField.type = "password";
+                                    confirmEyeIcons.classList.remove("fa-eye");
+                                    confirmEyeIcons.classList.add("fa-eye-slash");
+                                }
+                            });
+                        });
+                    </script>
+
+
+                }
+            </form>
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+<!-- /.content -->

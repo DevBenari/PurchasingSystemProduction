@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Create Email Supplier";
+    Layout = "~/Views/Shared/_TopNavbarPurchaseOrder.cshtml";
+}
+
+@using PurchasingSystemProduction.Areas.Order.ViewModels;
+@using PurchasingSystemProduction.Models;
+
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
+@model EmailViewModel
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-cyan">
+                <div class="card-header">
+                    <h3 class="card-title" style="color:#ffffff">@ViewBag.Title</h3>                    
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="CreateEmail" asp-controller="Email" class="needs-validation" novalidate="" enctype="multipart/form-data">                       
+                        <div class="card-body">
+                            <input asp-for="Status" type="hidden" value="Terkirim" />
+
+                            <div class="form-group">
+                                <input class="form-control" asp-for="To" placeholder="To:" />                                
+                                <span asp-validation-for="To" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" asp-for="Subject" placeholder="Subject:" />
+                                <span asp-validation-for="Subject" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" asp-for="Message" style="height: 300px" placeholder="Your message"></textarea>
+                                <span asp-validation-for="Message" class="text-danger"></span>
+                            </div>                            
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input asp-for="Document" class="form-control custom-file-input">
+                                    <label class="custom-file-label">Choose Document...</label>
+                                </div>
+                                <span asp-validation-for="Document" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary bg-indigo"><i class="far fa-envelope"></i> Send</button>
+                            <div class="btn btn-default" data-href="@Url.Action("RedirectToIndex", "Email")">Cancel</div>
+                        </div>
+                    </form>
+                </div>                
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-2"></div>
+    </div>
+</section>
+<!-- /.content -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.custom-file-input').on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).next('.custom-file-label').html(fileName);
+            });
+        });
+    </script>   
+}
+
