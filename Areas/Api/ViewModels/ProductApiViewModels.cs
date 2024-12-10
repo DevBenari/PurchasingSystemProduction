@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PurchasingSystemProduction.Areas.MasterData.ViewModels
+namespace PurchasingSystemProduction.Areas.Api.ViewModels
 {
-    public class ProductViewModel
+    public class ProductApiViewModels
     {
         public Guid ProductId { get; set; }
         public string ProductCode { get; set; }
@@ -30,12 +30,7 @@ namespace PurchasingSystemProduction.Areas.MasterData.ViewModels
         public string? StorageLocation { get; set; }
         public string? RackNumber { get; set; }
         public string? Note { get; set; }
-
-        // Jalur Api
-        public string SupplierName { get; set; }
-        public string CategoryName { get; set; }
-        public string MeasurementName { get; set; }
-        public int DiscountValue { get; set; }
-        public string WarehouseLocationName { get; set; }
     }
 }
+
+

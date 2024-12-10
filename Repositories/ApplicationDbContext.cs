@@ -38,7 +38,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     #region Areas Order
     public DbSet<PurchaseRequest> PurchaseRequests { get; set; }
     public DbSet<PurchaseRequestDetail> PurchaseRequestDetails { get; set; }
-    public DbSet<Approval> Approvals { get; set; }
+    public DbSet<ApprovalPurchaseRequest> Approvals { get; set; }
     public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     public DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
     public DbSet<ApprovalQtyDifference> ApprovalQtyDifferences { get; set; }

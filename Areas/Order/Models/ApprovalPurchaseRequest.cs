@@ -1,13 +1,15 @@
 ﻿using PurchasingSystemProduction.Areas.MasterData.Models;
 using PurchasingSystemProduction.Models;
 using PurchasingSystemProduction.Repositories;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PurchasingSystemProduction.Areas.Order.Models
 {
-    [Table("OrdApproval", Schema = "dbo")]
-    public class Approval : UserActivity
+    [Table("OrdApprovalPurchaseRequest", Schema = "dbo")]
+    public class ApprovalPurchaseRequest : UserActivity
     {
+        [Key]
         public Guid ApprovalId { get; set; }
         public Guid? PurchaseRequestId { get; set; }
         public string PurchaseRequestNumber { get; set; }

@@ -126,7 +126,7 @@ builder.Services.AddSignalR();
 
 #region Areas Order
 builder.Services.AddScoped<IPurchaseRequestRepository>();
-builder.Services.AddScoped<IApprovalRepository>();
+builder.Services.AddScoped<IApprovalPurchaseRequestRepository>();
 builder.Services.AddScoped<IPurchaseOrderRepository>();
 builder.Services.AddScoped<IEmailRepository>();
 builder.Services.AddScoped<IApprovalQtyDifferenceRepository>();
@@ -154,9 +154,6 @@ var app = builder.Build();
 
 builder.Services.AddDataProtection();
 
-// Tambahkan middleware untuk dekripsi URL
-app.UseMiddleware<DecryptUrlMiddleware>();
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsProduction())
 {
@@ -164,6 +161,8 @@ if (!app.Environment.IsProduction())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+// Tambahkan middleware untuk dekripsi URL
+app.UseMiddleware<DecryptUrlMiddleware>();
 
 //Tambahan Baru
 app.UseSession();
