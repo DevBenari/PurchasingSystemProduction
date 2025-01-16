@@ -8,24 +8,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Areas.Transaction.Repositories;
-using PurchasingSystemProduction.Areas.Transaction.ViewModels;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Areas.Transaction.Repositories;
+using PurchasingSystem.Areas.Transaction.ViewModels;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Areas.Warehouse.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
+using QRCoder;
+using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
-namespace PurchasingSystemProduction.Areas.Transaction.Controllers
+namespace PurchasingSystem.Areas.Transaction.Controllers
 {
     [Area("Transaction")]
     [Route("Transaction/[Controller]/[Action]")]
@@ -113,37 +115,53 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
             return Json(new SelectList(user, "UserActiveId", "FullName"));
         }
 
-        public IActionResult RedirectToIndex(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetProductsPaged(string term, int page = 1, int pageSize = 10)
         {
-            try
+            // Mulai query, include relasi Supplier
+            var query = _applicationDbContext.Products
+                .Include(p => p.Supplier)
+                .AsQueryable();
+
+            // Filter pencarian (jika user ketik di Select2)
+            if (!string.IsNullOrWhiteSpace(term))
             {
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Transaction/UnitRequest/Index?filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
+                // Misal: filter by product name
+                query = query.Where(p => p.ProductName.Contains(term) || p.Supplier.SupplierName.Contains(term));
             }
-            catch
+
+            // Total data
+            int totalCount = await query.CountAsync();
+
+            // Paging
+            query = query.OrderBy(p => p.ProductName)
+                         .Skip((page - 1) * pageSize)
+                         .Take(pageSize);
+
+            var items = await query.ToListAsync();
+
+            // Hasil: di Select2 butuh { id, text }
+            // "text" kita isi gabungan ProductName + '|' + SupplierName
+            var results = items.Select(p => new {
+                id = p.ProductId,
+                text = p.ProductName + " | " + p.Supplier.SupplierName
+            });
+
+            bool more = (page * pageSize) < totalCount;
+
+            var response = new
             {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
+                results = results,
+                pagination = new
+                {
+                    more = more
+                }
+            };
+
+            return Ok(response);
+        }       
 
         [HttpGet]
+        [Authorize(Roles = "ReadUnitRequest")]
         public async Task<IActionResult> Index(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
         {
             ViewBag.Active = "UnitRequest";
@@ -189,34 +207,9 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
 
             return View(model);
         }
-
-        public IActionResult RedirectToCreate()
-        {
-            try
-            {
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Create:Transaction/UnitRequest/CreateUnitRequest";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "CreateUnitRequest")]
         public async Task<IActionResult> CreateUnitRequest()
         {
             ViewBag.Active = "UnitRequest";
@@ -264,6 +257,7 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "CreateUnitRequest")]
         public async Task<IActionResult> CreateUnitRequest(UnitRequest model)
         {
             ViewBag.Active = "UnitRequest";
@@ -370,34 +364,9 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
                 return View(model);
             }
         }
-
-        public IActionResult RedirectToDetail(Guid Id)
-        {
-            try
-            {
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Detail:Transaction/UnitRequest/DetailUnitRequest/{Id}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "UpdateUnitRequest")]
         public async Task<IActionResult> DetailUnitRequest(Guid Id)
         {
             ViewBag.Active = "UnitRequest";
@@ -453,6 +422,7 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "UpdateUnitRequest")]
         public async Task<IActionResult> DetailUnitRequest(UnitRequest model)
         {
             ViewBag.Active = "UnitRequest";
@@ -543,7 +513,8 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
             return Json(new { redirectToUrl = Url.Action("Index", "UnitRequest") });
         }
 
-        public async Task<IActionResult> PrintUnitRequest(Guid Id)
+        [Authorize(Roles = "PreviewUnitRequest")]
+        public async Task<IActionResult> PreviewUnitRequest(Guid Id)
         {
             var unitRequest = await _unitRequestRepository.GetUnitRequestById(Id);
 
@@ -556,9 +527,89 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
             var Note = unitRequest.Note;
             var QtyTotal = unitRequest.QtyTotal;
 
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(ReqNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
+            // Load laporan ke FastReport
             WebReport web = new WebReport();
             var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\UnitRequest.frx";
             web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
+
+            var msSqlDataConnection = new MsSqlDataConnection();
+            msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
+            var Conn = msSqlDataConnection.ConnectionString;
+
+            web.Report.SetParameterValue("Conn", Conn);
+            web.Report.SetParameterValue("UnitRequestId", Id.ToString());
+            web.Report.SetParameterValue("ReqNumber", ReqNumber);
+            web.Report.SetParameterValue("CreateDate", CreateDate);
+            web.Report.SetParameterValue("CreateBy", CreateBy);
+            web.Report.SetParameterValue("UserApprove1", UserApprove1);
+            web.Report.SetParameterValue("UnitLocation", UnitLocation);
+            web.Report.SetParameterValue("WarehouseLocation", WarehouseLocation);
+            web.Report.SetParameterValue("Note", Note);
+            web.Report.SetParameterValue("QtyTotal", QtyTotal);
+
+            Stream stream = new MemoryStream();
+
+            web.Report.Prepare();
+            web.Report.Export(new PDFSimpleExport(), stream);
+            stream.Position = 0;
+
+            return File(stream, "application/pdf");
+        }
+
+        [Authorize(Roles = "DownloadUnitRequest")]
+        public async Task<IActionResult> DownloadUnitRequest(Guid Id)
+        {
+            var unitRequest = await _unitRequestRepository.GetUnitRequestById(Id);
+
+            var CreateDate = unitRequest.CreateDateTime.ToString("dd MMMM yyyy");
+            var ReqNumber = unitRequest.UnitRequestNumber;
+            var CreateBy = unitRequest.ApplicationUser.NamaUser;
+            var UserApprove1 = unitRequest.UserApprove1.FullName;
+            var UnitLocation = unitRequest.UnitLocation.UnitLocationName;
+            var WarehouseLocation = unitRequest.WarehouseLocation.WarehouseLocationName;
+            var Note = unitRequest.Note;
+            var QtyTotal = unitRequest.QtyTotal;
+
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(ReqNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
+            // Load laporan ke FastReport
+            WebReport web = new WebReport();
+            var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\UnitRequest.frx";
+            web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
 
             var msSqlDataConnection = new MsSqlDataConnection();
             msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -576,10 +627,52 @@ namespace PurchasingSystemProduction.Areas.Transaction.Controllers
             web.Report.SetParameterValue("QtyTotal", QtyTotal);
 
             web.Report.Prepare();
+
             Stream stream = new MemoryStream();
             web.Report.Export(new PDFSimpleExport(), stream);
             stream.Position = 0;
+
             return File(stream, "application/zip", (ReqNumber + ".pdf"));
+        }
+
+        private Bitmap GenerateQRCodeWithLogo(string text, string logoPath)
+        {
+            if (!System.IO.File.Exists(logoPath))
+            {
+                throw new FileNotFoundException("Logo file not found", logoPath);
+            }
+
+            // Step 1: Generate QR code as byte array using PngByteQRCode
+            using var qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.H);
+            using var qrCode = new PngByteQRCode(qrCodeData);
+            byte[] qrCodeBytes = qrCode.GetGraphic(4);
+
+            // Step 2: Load QR code byte array into Bitmap
+            Bitmap qrBitmap;
+            using (var ms = new MemoryStream(qrCodeBytes))
+            {
+                qrBitmap = new Bitmap(ms);
+            }
+
+            // Step 3: Ensure QR code is in a writable pixel format
+            Bitmap writableQrBitmap = new Bitmap(qrBitmap.Width, qrBitmap.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                graphics.DrawImage(qrBitmap, 0, 0);
+            }
+
+            // Step 4: Load logo and add it to the QR code
+            using var logoBitmap = new Bitmap(logoPath);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                int logoSize = (writableQrBitmap.Width + 125) / 5; // Logo size (20% of QR code size)
+                int x = (writableQrBitmap.Width - logoSize) / 2;
+                int y = (writableQrBitmap.Height - logoSize) / 2;
+                graphics.DrawImage(logoBitmap, new Rectangle(x, y, logoSize, logoSize));
+            }
+
+            return writableQrBitmap;
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using PurchasingSystemProduction.Areas.MasterData.ViewModels;
-using PurchasingSystemProduction.Models;
+﻿using PurchasingSystem.Areas.MasterData.ViewModels;
+using PurchasingSystem.Models;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Models
+namespace PurchasingSystem.Areas.MasterData.Models
 {
     public class Dashboard
     {

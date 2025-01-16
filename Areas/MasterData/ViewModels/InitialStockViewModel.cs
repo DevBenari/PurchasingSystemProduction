@@ -1,7 +1,7 @@
-﻿using PurchasingSystemProduction.Areas.MasterData.Models;
+﻿using PurchasingSystem.Areas.MasterData.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace PurchasingSystemProduction.Areas.MasterData.ViewModels
+namespace PurchasingSystem.Areas.MasterData.ViewModels
 {
     public class InitialStockViewModel
     {

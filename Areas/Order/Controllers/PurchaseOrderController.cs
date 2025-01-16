@@ -1,27 +1,30 @@
 ﻿using FastReport.Data;
 using FastReport.Export.PdfSimple;
 using FastReport.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Order.ViewModels;
-using PurchasingSystemProduction.Areas.Warehouse.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Order.ViewModels;
+using PurchasingSystem.Areas.Warehouse.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
+using QRCoder;
 using System.Data;
+using System.Drawing;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
-namespace PurchasingSystemProduction.Areas.Order.Controllers
+namespace PurchasingSystem.Areas.Order.Controllers
 {
     [Area("Order")]
     [Route("Order/[Controller]/[Action]")]
@@ -104,39 +107,10 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             var qtyDiffDetail = _applicationDbContext.QtyDifferenceDetails
                 .Where(d => d.QtyDifferenceId == qtyDiff.QtyDifferenceId && d.ProductNumber == podetail.ProductNumber).FirstOrDefault();
             return new JsonResult(qtyDiffDetail);
-        }
-
-        public IActionResult RedirectToIndex(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Order/PurchaseOrder/Index?filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
+        }        
 
         [HttpGet]
+        [Authorize(Roles = "ReadPurchaseOrder")]
         public async Task<IActionResult> Index(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
         {
             ViewBag.Active = "PurchaseOrder";
@@ -173,34 +147,9 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
 
             return View(model);
         }
-
-        public IActionResult RedirectToDetail(Guid Id)
-        {
-            try
-            {
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Detail:Order/PurchaseOrder/DetailPurchaseOrder/{Id}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "UpdatePurchaseOrder")]
         public async Task<IActionResult> DetailPurchaseOrder(Guid Id)
         {
             ViewBag.Active = "PurchaseOrder";
@@ -230,7 +179,6 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
                 UserApprove2Id = purchaseOrder.UserApprove2Id,
                 UserApprove3Id = purchaseOrder.UserApprove3Id,
                 TermOfPaymentId = purchaseOrder.TermOfPaymentId,
-                //DueDate = purchaseOrder.DueDate,
                 Status = purchaseOrder.Status,
                 QtyTotal = purchaseOrder.QtyTotal,
                 GrandTotal = Math.Truncate(purchaseOrder.GrandTotal),
@@ -261,207 +209,8 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             return View(model);
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GenerateNewPo(Guid Id)
-        //{
-        //    ViewBag.Active = "PurchaseOrder";
-
-        //    ViewBag.User = new SelectList(_userManager.Users, nameof(ApplicationUser.Id), nameof(ApplicationUser.NamaUser), SortOrder.Ascending);
-        //    ViewBag.Product = new SelectList(await _productRepository.GetProducts(), "ProductId", "ProductName", SortOrder.Ascending);
-        //    ViewBag.Approval = new SelectList(await _userActiveRepository.GetUserActives(), "UserActiveId", "FullName", SortOrder.Ascending);
-        //    ViewBag.TermOfPayment = new SelectList(await _termOfPaymentRepository.GetTermOfPayments(), "TermOfPaymentId", "TermOfPaymentName", SortOrder.Ascending);
-
-        //    PurchaseOrder purchaseOrder = _applicationDbContext.PurchaseOrders
-        //        .Include(d => d.PurchaseOrderDetails)
-        //        .Include(u => u.ApplicationUser)
-        //        .Include(a1 => a1.UserApprove1)
-        //        .Include(a2 => a2.UserApprove2)
-        //        .Include(a3 => a3.UserApprove3)
-        //        .Include(p => p.TermOfPayment)
-        //        .Where(p => p.PurchaseOrderId == Id).FirstOrDefault();
-
-        //    _signInManager.IsSignedIn(User);
-
-        //    var getUser = _userActiveRepository.GetAllUserLogin().Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-
-        //    PurchaseOrder po = new PurchaseOrder();
-
-        //    var dateNow = DateTimeOffset.Now;
-        //    var setDateNow = DateTimeOffset.Now.ToString("yyMMdd");
-
-        //    var lastCode = _purchaseOrderRepository.GetAllPurchaseOrder().Where(d => d.CreateDateTime.ToString("yyMMdd") == dateNow.ToString("yyMMdd")).OrderByDescending(k => k.PurchaseOrderNumber).FirstOrDefault();
-        //    if (lastCode == null)
-        //    {
-        //        po.PurchaseOrderNumber = "PO" + setDateNow + "0001";
-        //    }
-        //    else
-        //    {
-        //        var lastCodeTrim = lastCode.PurchaseOrderNumber.Substring(2, 6);
-
-        //        if (lastCodeTrim != setDateNow)
-        //        {
-        //            po.PurchaseOrderNumber = "PO" + setDateNow + "0001";
-        //        }
-        //        else
-        //        {
-        //            po.PurchaseOrderNumber = "PO" + setDateNow + (Convert.ToInt32(lastCode.PurchaseOrderNumber.Substring(9, lastCode.PurchaseOrderNumber.Length - 9)) + 1).ToString("D4");
-        //        }
-        //    }
-
-        //    ViewBag.PurchaseOrderNumber = po.PurchaseOrderNumber;
-
-        //    var getQtyDiff = _qtyDifferenceRepository.GetAllQtyDifference().Where(po => po.PurchaseOrderId == purchaseOrder.PurchaseOrderId).FirstOrDefault();
-
-        //    var getPo = new PurchaseOrder()
-        //    {
-        //        PurchaseRequestId = purchaseOrder.PurchaseRequestId,
-        //        PurchaseRequestNumber = purchaseOrder.PurchaseRequestNumber,
-        //        PurchaseOrderId = purchaseOrder.PurchaseOrderId,
-        //        ExpiredDate = purchaseOrder.ExpiredDate,
-        //        UserAccessId = purchaseOrder.UserAccessId,
-        //        UserApprove1Id = purchaseOrder.UserApprove1Id,
-        //        UserApprove2Id = purchaseOrder.UserApprove2Id,
-        //        UserApprove3Id = purchaseOrder.UserApprove3Id,
-        //        ApproveStatusUser1 = purchaseOrder.ApproveStatusUser1,
-        //        ApproveStatusUser2 = purchaseOrder.ApproveStatusUser2,
-        //        ApproveStatusUser3 = purchaseOrder.ApproveStatusUser3,
-        //        TermOfPaymentId = purchaseOrder.TermOfPaymentId,
-        //        Status = purchaseOrder.Status,
-        //        QtyTotal = purchaseOrder.QtyTotal,
-        //        GrandTotal = Math.Truncate(purchaseOrder.GrandTotal),
-        //        Note = "Reference from PO Number " + purchaseOrder.PurchaseOrderNumber,
-        //    };
-
-        //    var ItemsList = new List<PurchaseOrderDetail>();
-
-        //    foreach (var item in purchaseOrder.PurchaseOrderDetails)
-        //    {
-        //        if (purchaseOrder.PurchaseOrderDetails.Count != 1)
-        //        {
-        //            foreach (var itemQtyDiff in getQtyDiff.QtyDifferenceDetails)
-        //            {
-        //                if (itemQtyDiff.ProductName == item.ProductName && itemQtyDiff.QtyReceive == item.Qty)
-        //                {
-        //                    ItemsList.Add(new PurchaseOrderDetail
-        //                    {
-        //                        CreateDateTime = DateTime.Now,
-        //                        CreateBy = new Guid(getUser.Id),
-        //                        ProductNumber = item.ProductNumber,
-        //                        ProductName = item.ProductName,
-        //                        Supplier = item.Supplier,
-        //                        Measurement = item.Measurement,
-        //                        Qty = item.Qty,
-        //                        Price = Math.Truncate(item.Price),
-        //                        Discount = item.Discount,
-        //                        SubTotal = Math.Truncate(item.SubTotal)
-        //                    });
-        //                }
-        //            }
-        //        }
-        //        else {
-        //            ItemsList.Add(new PurchaseOrderDetail
-        //            {
-        //                CreateDateTime = DateTime.Now,
-        //                CreateBy = new Guid(getUser.Id),
-        //                ProductNumber = item.ProductNumber,
-        //                ProductName = item.ProductName,
-        //                Supplier = item.Supplier,
-        //                Measurement = item.Measurement,
-        //                Qty = item.Qty,
-        //                Price = Math.Truncate(item.Price),
-        //                Discount = item.Discount,
-        //                SubTotal = Math.Truncate(item.SubTotal)
-        //            });
-        //        }
-        //    }
-
-        //    getPo.PurchaseOrderDetails = ItemsList;
-        //    return View(getPo);
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> GenerateNewPo(PurchaseOrder model)
-        //{
-        //    ViewBag.Active = "PurchaseOrder";
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        //PurchaseOrder purchaseOrder = await _purchaseOrderRepository.GetPurchaseOrderByIdNoTracking(model.PurchaseOrderId);
-
-        //        _signInManager.IsSignedIn(User);
-
-        //        var getUser = _userActiveRepository.GetAllUserLogin().Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-
-        //        //string getPurchaseOrderNumber = Request.Form["PONumber"];
-
-        //        var updatePurchaseRequest = _purchaseRequestRepository.GetAllPurchaseRequest().Where(c => c.PurchaseRequestId == model.PurchaseRequestId).FirstOrDefault();
-        //        if (updatePurchaseRequest != null)
-        //        {
-        //            updatePurchaseRequest.Status = model.PurchaseOrderNumber;
-        //            _applicationDbContext.Entry(updatePurchaseRequest).State = EntityState.Modified;
-        //        }
-
-        //        var updateStatusPo = _purchaseOrderRepository.GetAllPurchaseOrder().Where(p => p.PurchaseRequestId == model.PurchaseRequestId).FirstOrDefault();
-        //        if (updateStatusPo != null)
-        //        {
-        //            updateStatusPo.Status = "Cancelled";
-        //            _applicationDbContext.Entry(updateStatusPo).State = EntityState.Modified;
-        //        }
-
-        //        var newPurchaseOrder = new PurchaseOrder
-        //        {
-        //            CreateDateTime = DateTime.Now,
-        //            CreateBy = new Guid(getUser.Id),
-        //            PurchaseRequestId = model.PurchaseRequestId,
-        //            PurchaseRequestNumber = model.PurchaseRequestNumber,
-        //            ExpiredDate = model.ExpiredDate,
-        //            UserAccessId = getUser.Id.ToString(),
-        //            UserApprove1Id = model.UserApprove1Id,
-        //            UserApprove2Id = model.UserApprove2Id,
-        //            UserApprove3Id = model.UserApprove3Id,
-        //            ApproveStatusUser1 = model.ApproveStatusUser1,
-        //            ApproveStatusUser2 = model.ApproveStatusUser2,
-        //            ApproveStatusUser3 = model.ApproveStatusUser3,
-        //            TermOfPaymentId = model.TermOfPaymentId,
-        //            Status = "In Order",
-        //            QtyTotal = model.QtyTotal,
-        //            GrandTotal = Math.Truncate(model.GrandTotal),
-        //            Note = model.Note
-        //        };
-
-        //        newPurchaseOrder.PurchaseOrderNumber = model.PurchaseOrderNumber;
-
-        //        var ItemsList = new List<PurchaseOrderDetail>();
-
-        //        foreach (var item in model.PurchaseOrderDetails)
-        //        {
-        //            ItemsList.Add(new PurchaseOrderDetail
-        //            {
-        //                CreateDateTime = DateTime.Now,
-        //                CreateBy = new Guid(getUser.Id),
-        //                ProductNumber = item.ProductNumber,
-        //                ProductName = item.ProductName,
-        //                Supplier = item.Supplier,
-        //                Measurement = item.Measurement,
-        //                Qty = item.Qty,
-        //                Price = Math.Truncate(item.Price),
-        //                Discount = item.Discount,
-        //                SubTotal = Math.Truncate(item.SubTotal)
-        //            });
-        //        }
-
-        //        newPurchaseOrder.PurchaseOrderDetails = ItemsList;
-
-        //        _purchaseOrderRepository.Tambah(newPurchaseOrder);
-
-        //        TempData["SuccessMessage"] = "Number " + newPurchaseOrder.PurchaseOrderNumber + " Saved";
-        //        return Json(new { redirectToUrl = Url.Action("Index", "PurchaseOrder") });
-        //    }
-
-        //    return View();
-        //}
-
-        public async Task<IActionResult> PrintPurchaseOrder(Guid Id)
+        [Authorize(Roles = "PreviewPurchaseOrder")]
+        public async Task<IActionResult> PreviewPurchaseOrder(Guid Id)
         {
             var purchaseOrder = await _purchaseOrderRepository.GetPurchaseOrderById(Id);
 
@@ -472,15 +221,98 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             var UserApprove2 = purchaseOrder.UserApprove2.FullName;
             var UserApprove3 = purchaseOrder.UserApprove3.FullName;
             var TermOfPayment = purchaseOrder.TermOfPayment.TermOfPaymentName;
-            //var DueDate = purchaseOrder.DueDate;
             var Note = purchaseOrder.Note;
             var GrandTotal = purchaseOrder.GrandTotal;
             var Tax = (GrandTotal / 100) * 11;
             var GrandTotalAfterTax = (GrandTotal + Tax);
 
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(PoNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
             WebReport web = new WebReport();
             var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\PurchaseOrder.frx";
             web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
+
+            var msSqlDataConnection = new MsSqlDataConnection();
+            msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
+            var Conn = msSqlDataConnection.ConnectionString;
+
+            web.Report.SetParameterValue("Conn", Conn);
+            web.Report.SetParameterValue("PurchaseOrderId", Id.ToString());
+            web.Report.SetParameterValue("PoNumber", PoNumber);
+            web.Report.SetParameterValue("CreateDate", CreateDate);
+            web.Report.SetParameterValue("CreateBy", CreateBy);
+            web.Report.SetParameterValue("UserApprove1", UserApprove1);
+            web.Report.SetParameterValue("UserApprove2", UserApprove2);
+            web.Report.SetParameterValue("UserApprove3", UserApprove3);
+            web.Report.SetParameterValue("TermOfPayment", TermOfPayment);
+            web.Report.SetParameterValue("Note", Note);
+            web.Report.SetParameterValue("GrandTotal", GrandTotal);
+            web.Report.SetParameterValue("Tax", Tax);
+            web.Report.SetParameterValue("GrandTotalAfterTax", GrandTotalAfterTax);
+
+            Stream stream = new MemoryStream();
+
+            web.Report.Prepare();
+            web.Report.Export(new PDFSimpleExport(), stream);
+            stream.Position = 0;
+
+            return File(stream, "application/pdf");
+        }
+
+        [Authorize(Roles = "DownloadPurchaseOrder")]
+        public async Task<IActionResult> DownloadPurchaseOrder(Guid Id)
+        {
+            var purchaseOrder = await _purchaseOrderRepository.GetPurchaseOrderById(Id);
+
+            var CreateDate = purchaseOrder.CreateDateTime.ToString("dd MMMM yyyy");
+            var PoNumber = purchaseOrder.PurchaseOrderNumber;
+            var CreateBy = purchaseOrder.ApplicationUser.NamaUser;
+            var UserApprove1 = purchaseOrder.UserApprove1.FullName;
+            var UserApprove2 = purchaseOrder.UserApprove2.FullName;
+            var UserApprove3 = purchaseOrder.UserApprove3.FullName;
+            var TermOfPayment = purchaseOrder.TermOfPayment.TermOfPaymentName;
+            var Note = purchaseOrder.Note;
+            var GrandTotal = purchaseOrder.GrandTotal;
+            var Tax = (GrandTotal / 100) * 11;
+            var GrandTotalAfterTax = (GrandTotal + Tax);
+
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(PoNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
+            WebReport web = new WebReport();
+            var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\PurchaseOrder.frx";
+            web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
 
             var msSqlDataConnection = new MsSqlDataConnection();
             msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -501,10 +333,52 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             web.Report.SetParameterValue("GrandTotalAfterTax", GrandTotalAfterTax);
 
             web.Report.Prepare();
+
             Stream stream = new MemoryStream();
             web.Report.Export(new PDFSimpleExport(), stream);
             stream.Position = 0;
+
             return File(stream, "application/zip", (PoNumber + ".pdf"));
+        }
+
+        private Bitmap GenerateQRCodeWithLogo(string text, string logoPath)
+        {
+            if (!System.IO.File.Exists(logoPath))
+            {
+                throw new FileNotFoundException("Logo file not found", logoPath);
+            }
+
+            // Step 1: Generate QR code as byte array using PngByteQRCode
+            using var qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.H);
+            using var qrCode = new PngByteQRCode(qrCodeData);
+            byte[] qrCodeBytes = qrCode.GetGraphic(4);
+
+            // Step 2: Load QR code byte array into Bitmap
+            Bitmap qrBitmap;
+            using (var ms = new MemoryStream(qrCodeBytes))
+            {
+                qrBitmap = new Bitmap(ms);
+            }
+
+            // Step 3: Ensure QR code is in a writable pixel format
+            Bitmap writableQrBitmap = new Bitmap(qrBitmap.Width, qrBitmap.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                graphics.DrawImage(qrBitmap, 0, 0);
+            }
+
+            // Step 4: Load logo and add it to the QR code
+            using var logoBitmap = new Bitmap(logoPath);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                int logoSize = (writableQrBitmap.Width + 125) / 5; // Logo size (20% of QR code size)
+                int x = (writableQrBitmap.Width - logoSize) / 2;
+                int y = (writableQrBitmap.Height - logoSize) / 2;
+                graphics.DrawImage(logoBitmap, new Rectangle(x, y, logoSize, logoSize));
+            }
+
+            return writableQrBitmap;
         }
     }
 }

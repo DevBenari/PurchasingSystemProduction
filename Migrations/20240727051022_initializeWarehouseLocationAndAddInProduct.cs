@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PurchasingSystemProduction.Migrations
+namespace PurchasingSystem.Migrations
 {
     public partial class initializeWarehouseLocationAndAddInProduct : Migration
     {

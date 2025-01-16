@@ -10,16 +10,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.MasterData.ViewModels;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Order.ViewModels;
-using PurchasingSystemProduction.Areas.Transaction.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.MasterData.ViewModels;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Order.ViewModels;
+using PurchasingSystem.Areas.Transaction.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Metrics;
@@ -27,7 +27,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-namespace PurchasingSystemProduction.Areas.Order.Controllers
+namespace PurchasingSystem.Areas.Order.Controllers
 {
     [Area("Order")]
     [Route("Order/[Controller]/[Action]")]
@@ -125,9 +125,9 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
                     Address = user.Address,
                     Handphone = user.Handphone,
                     Email = user.Email,
-                    UserPhotoPath = user.Foto
+                    UserPhotoPath = user.Foto,
+                    IsActive = user.IsActive
                 };
-
                 return View(viewModel);
             }
             else if (user == null && checkUserLogin.NamaUser == "SuperAdmin")
@@ -136,7 +136,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
                 {
                     UserActiveCode = checkUserLogin.KodeUser,
                     FullName = checkUserLogin.NamaUser,
-                    Email = checkUserLogin.Email
+                    Email = checkUserLogin.Email,
                 };
                 return View(viewModel);
             }

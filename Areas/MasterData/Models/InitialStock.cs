@@ -1,9 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Models
+namespace PurchasingSystem.Areas.MasterData.Models
 {
     [Table("MstInitialStock", Schema = "dbo")]
     public class InitialStock : UserActivity

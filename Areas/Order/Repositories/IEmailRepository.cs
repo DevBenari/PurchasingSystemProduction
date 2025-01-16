@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.Order.Repositories
+namespace PurchasingSystem.Areas.Order.Repositories
 {
     public class IEmailRepository
     {

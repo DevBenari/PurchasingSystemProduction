@@ -1,11 +1,11 @@
-﻿using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.Order.Models
+namespace PurchasingSystem.Areas.Order.Models
 {
     [Table("OrdApprovalQtyDifference", Schema = "dbo")]
     public class ApprovalQtyDifference : UserActivity

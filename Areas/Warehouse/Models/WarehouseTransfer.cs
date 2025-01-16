@@ -1,11 +1,11 @@
-﻿using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.Models
+namespace PurchasingSystem.Areas.Warehouse.Models
 {
     [Table("WrhWarehouseTransfer", Schema = "dbo")]
     public class WarehouseTransfer : UserActivity

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace PurchasingSystemProduction.Repositories
+namespace PurchasingSystem.Repositories
 {
     public class Pagination<T>
     {

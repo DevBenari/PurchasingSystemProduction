@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Data;
+using PurchasingSystem.Repositories;
 using System.Diagnostics.Metrics;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Repositories
-{
-    public class IProductRepository
+namespace PurchasingSystem.Areas.MasterData.Repositories
+{   
+    public class IProductRepository 
     {
         private readonly ApplicationDbContext _context;
 
@@ -25,6 +25,7 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
         public async Task<Product> GetProductById(Guid Id)
         {
             var Product = await _context.Products
+                .Where(a => a.IsActive == true)
                 .Include(p => p.Supplier)
                 .Include(c => c.Category)
                 .Include(m => m.Measurement)
@@ -40,10 +41,16 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
                     ProductCode = Product.ProductCode,
                     ProductName = Product.ProductName,
                     SupplierId = Product.SupplierId,
+                    Supplier = Product.Supplier,
                     CategoryId = Product.CategoryId,
+                    Category = Product.Category,
                     MeasurementId = Product.MeasurementId,
+                    Measurement = Product.Measurement,
                     DiscountId = Product.DiscountId,
+                    Discount = Product.Discount,
                     WarehouseLocationId = Product.WarehouseLocationId,
+                    WarehouseLocation = Product.WarehouseLocation,
+                    ExpiredDate = Product.ExpiredDate,
                     MinStock = Product.MinStock,
                     MaxStock = Product.MaxStock,
                     BufferStock = Product.BufferStock,
@@ -53,6 +60,7 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
                     RetailPrice = Product.RetailPrice,
                     StorageLocation = Product.StorageLocation,
                     RackNumber = Product.RackNumber,
+                    IsActive = Product.IsActive,
                     Note = Product.Note
                 };
                 return ProductDetail;
@@ -70,33 +78,40 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
             return await _context.Products
                 .Include(s => s.Supplier)
                 .OrderBy(p => p.CreateDateTime)
+                .Where(a => a.IsActive == true)
                 //.Take(20)
                 .Select(Product => new Product() {
-                ProductId = Product.ProductId,
-                ProductCode = Product.ProductCode,
-                ProductName = Product.ProductName,
-                Supplier = Product.Supplier,
-                SupplierId = Product.SupplierId,
-                CategoryId = Product.CategoryId,
-                MeasurementId = Product.MeasurementId,
-                DiscountId = Product.DiscountId,
-                WarehouseLocationId = Product.WarehouseLocationId,
-                MinStock = Product.MinStock,
-                MaxStock = Product.MaxStock,
-                BufferStock = Product.BufferStock,
-                Stock = Product.Stock,
-                Cogs = Product.Cogs,
-                BuyPrice = Product.BuyPrice,
-                RetailPrice = Product.RetailPrice,
-                StorageLocation = Product.StorageLocation,
-                RackNumber = Product.RackNumber,
-                Note = Product.Note
-            }).ToListAsync();
-        }
+                    ProductId = Product.ProductId,
+                    ProductCode = Product.ProductCode,
+                    ProductName = Product.ProductName,
+                    SupplierId = Product.SupplierId,
+                    Supplier = Product.Supplier,
+                    CategoryId = Product.CategoryId,
+                    Category = Product.Category,
+                    MeasurementId = Product.MeasurementId,
+                    Measurement = Product.Measurement,
+                    DiscountId = Product.DiscountId,
+                    Discount = Product.Discount,
+                    WarehouseLocationId = Product.WarehouseLocationId,
+                    WarehouseLocation = Product.WarehouseLocation,
+                    ExpiredDate = Product.ExpiredDate,
+                    MinStock = Product.MinStock,
+                    MaxStock = Product.MaxStock,
+                    BufferStock = Product.BufferStock,
+                    Stock = Product.Stock,
+                    Cogs = Product.Cogs,
+                    BuyPrice = Product.BuyPrice,
+                    RetailPrice = Product.RetailPrice,
+                    StorageLocation = Product.StorageLocation,
+                    RackNumber = Product.RackNumber,
+                    IsActive = Product.IsActive,
+                    Note = Product.Note
+                }).ToListAsync();
+        }        
 
         public IEnumerable<Product> GetAllProduct()
         {
-            return _context.Products.OrderByDescending(d => d.CreateDateTime)
+            return _context.Products.OrderByDescending(d => d.CreateDateTime).Where(a => a.IsActive == true)
                 .Include(p => p.Supplier)
                 .Include(c => c.Category)
                 .Include(m => m.Measurement)
@@ -109,6 +124,7 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
         {
             var query = _context.Products
                 .OrderByDescending(d => d.CreateDateTime)
+                .Where(a => a.IsActive == true)
                 .Include(p => p.Supplier)
                 .Include(c => c.Category)
                 .Include(m => m.Measurement)

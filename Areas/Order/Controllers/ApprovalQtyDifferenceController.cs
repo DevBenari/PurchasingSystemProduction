@@ -1,29 +1,30 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Order.ViewModels;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Areas.Transaction.Repositories;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Repositories;
-using PurchasingSystemProduction.Areas.Warehouse.ViewModels;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Hubs;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Order.ViewModels;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Areas.Transaction.Repositories;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Areas.Warehouse.Repositories;
+using PurchasingSystem.Areas.Warehouse.ViewModels;
+using PurchasingSystem.Data;
+using PurchasingSystem.Hubs;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.Security.Cryptography;
 using System.Text;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
-namespace PurchasingSystemProduction.Areas.Order.Controllers
+namespace PurchasingSystem.Areas.Order.Controllers
 {
     [Area("Order")]
     [Route("Order/[Controller]/[Action]")]
@@ -87,40 +88,10 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             _protector = provider.CreateProtector("UrlProtector");
             _urlMappingService = urlMappingService;
             _hostingEnvironment = hostingEnvironment;
-        }
-
-        public IActionResult RedirectToIndex(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                ViewBag.Active = "ApprovalQtyDifference";
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Order/ApprovalQtyDifference/Index?filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }           
-        }
+        }        
 
         [HttpGet]
+        [Authorize(Roles = "ReadApprovalQtyDifference")]
         public async Task<IActionResult> Index(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
         {
             ViewBag.Active = "ApprovalQtyDifference";
@@ -226,35 +197,9 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             }
             return View();
         }
-
-        public IActionResult RedirectToDetail(Guid Id)
-        {
-            try
-            {
-                ViewBag.Active = "ApprovalQtyDifference";
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Detail:Order/ApprovalQtyDifference/DetailApprovalQtyDifference/{Id}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "UpdateApprovalQtyDifference")]
         public async Task<ViewResult> DetailApprovalQtyDifference(Guid Id)
         {
             ViewBag.Active = "ApprovalQtyDifference";
@@ -319,6 +264,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "UpdateApprovalQtyDifference")]
         public async Task<IActionResult> DetailApprovalQtyDifference(ApprovalQtyDifferenceViewModel viewModel)
         {
             ViewBag.Active = "ApprovalQtyDifference";
@@ -434,8 +380,8 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
                             ApproveStatusUser3 = getPR.ApproveStatusUser3,
                             TermOfPaymentId = getPR.TermOfPaymentId,
                             Status = "In Order",
-                            QtyTotal = getPR.QtyTotal,
-                            GrandTotal = Math.Truncate(getPR.GrandTotal),
+                            //QtyTotal = getPR.QtyTotal,
+                            //GrandTotal = Math.Truncate(getPR.GrandTotal),
                             Note = "Reference from PO Number " + getPO.PurchaseOrderNumber,
                         };
 
@@ -443,7 +389,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
 
                         foreach (var item in getPO.PurchaseOrderDetails)
                         {
-                            if (getPO.PurchaseOrderDetails.Count != 1)
+                            if (getPO.PurchaseOrderDetails.Count != 0)
                             {
                                 foreach (var itemQtyDiff in getQtyDiff.QtyDifferenceDetails)
                                 {
@@ -476,29 +422,15 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
                                             Qty = itemQtyDiff.QtyReceive,
                                             Price = Math.Truncate(item.Price),
                                             Discount = item.Discount,
-                                            SubTotal = Math.Truncate(item.SubTotal)
+                                            SubTotal = Math.Truncate((itemQtyDiff.QtyReceive * item.Price) - (item.Discount))
                                         });
                                     }
                                 }
-                            }
-                            else
-                            {
-                                ItemsList.Add(new PurchaseOrderDetail
-                                {
-                                    CreateDateTime = DateTimeOffset.Now,
-                                    CreateBy = new Guid(getUser.Id),
-                                    ProductNumber = item.ProductNumber,
-                                    ProductName = item.ProductName,
-                                    Supplier = item.Supplier,
-                                    Measurement = item.Measurement,
-                                    Qty = item.Qty,
-                                    Price = Math.Truncate(item.Price),
-                                    Discount = item.Discount,
-                                    SubTotal = Math.Truncate(item.SubTotal)
-                                });
-                            }
+                            }                           
                         }
 
+                        newPO.QtyTotal = ItemsList.Sum(p => p.Qty);
+                        newPO.GrandTotal = ItemsList.Sum(p => p.SubTotal);
                         newPO.PurchaseOrderDetails = ItemsList;
 
                         var dateNow = DateTimeOffset.Now;

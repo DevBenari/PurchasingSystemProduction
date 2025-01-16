@@ -1,4 +1,4 @@
-﻿namespace PurchasingSystemProduction.Areas.Warehouse.ViewModels
+﻿namespace PurchasingSystem.Areas.Warehouse.ViewModels
 {
     public class UnitOrderDetailViewModel
     {

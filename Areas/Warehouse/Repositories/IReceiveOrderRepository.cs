@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.Repositories
+namespace PurchasingSystem.Areas.Warehouse.Repositories
 {
     public class IReceiveOrderRepository
     {
@@ -47,15 +47,18 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Repositories
                     UpdateBy = receiveOrder.UpdateBy,
                     DeleteDateTime = receiveOrder.DeleteDateTime,
                     DeleteBy = receiveOrder.DeleteBy,
+                    ApplicationUser = receiveOrder.ApplicationUser,
                     ReceiveOrderId = receiveOrder.ReceiveOrderId,
                     ReceiveOrderNumber = receiveOrder.ReceiveOrderNumber,
                     PurchaseOrderId = receiveOrder.PurchaseOrderId,
+                    PurchaseOrder = receiveOrder.PurchaseOrder,
                     ReceiveById = receiveOrder.ReceiveById,
                     ShippingNumber = receiveOrder.ShippingNumber,
                     DeliveryServiceName = receiveOrder.DeliveryServiceName,
                     DeliveryDate = receiveOrder.DeliveryDate,
                     WaybillNumber = receiveOrder.WaybillNumber,
                     InvoiceNumber = receiveOrder.InvoiceNumber,
+                    SenderName = receiveOrder.SenderName,
                     Status = receiveOrder.Status,
                     Note = receiveOrder.Note,
                     ReceiveOrderDetails = receiveOrder.ReceiveOrderDetails
@@ -80,15 +83,18 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Repositories
                 UpdateBy = receiveOrder.UpdateBy,
                 DeleteDateTime = receiveOrder.DeleteDateTime,
                 DeleteBy = receiveOrder.DeleteBy,
+                ApplicationUser = receiveOrder.ApplicationUser,
                 ReceiveOrderId = receiveOrder.ReceiveOrderId,
                 ReceiveOrderNumber = receiveOrder.ReceiveOrderNumber,
                 PurchaseOrderId = receiveOrder.PurchaseOrderId,
+                PurchaseOrder = receiveOrder.PurchaseOrder,
                 ReceiveById = receiveOrder.ReceiveById,
                 ShippingNumber = receiveOrder.ShippingNumber,
                 DeliveryServiceName = receiveOrder.DeliveryServiceName,
                 DeliveryDate = receiveOrder.DeliveryDate,
                 WaybillNumber = receiveOrder.WaybillNumber,
                 InvoiceNumber = receiveOrder.InvoiceNumber,
+                SenderName = receiveOrder.SenderName,
                 Status = receiveOrder.Status,
                 Note = receiveOrder.Note,
                 ReceiveOrderDetails = receiveOrder.ReceiveOrderDetails

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
-namespace PurchasingSystemProduction.ViewModels
+namespace PurchasingSystem.ViewModels
 {
     public class LoginViewModel
     {

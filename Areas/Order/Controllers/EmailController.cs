@@ -1,23 +1,23 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.MasterData.ViewModels;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Order.ViewModels;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.MasterData.ViewModels;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Order.ViewModels;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
 using System.Net.Mail;
 using System.Net;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using Microsoft.AspNetCore.DataProtection;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Repositories;
 using System.Security.Cryptography;
 using System.Text;
-using PurchasingSystemProduction.Areas.MasterData.Models;
+using PurchasingSystem.Areas.MasterData.Models;
 
-namespace PurchasingSystemProduction.Areas.Order.Controllers
+namespace PurchasingSystem.Areas.Order.Controllers
 {
     [Area("Order")]
     [Route("Order/[Controller]/[Action]")]
@@ -56,37 +56,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             _hostingEnvironment = hostingEnvironment;
         }
 
-        public IActionResult RedirectToIndex(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                ViewBag.Active = "PurchaseOrder";
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Order/Email/Index?filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        [Authorize(Roles = "ReadEmail")]
         public async Task<IActionResult> Index(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
         {
             ViewBag.Active = "PurchaseOrder";
@@ -122,36 +92,10 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
             };
 
             return View(model);
-        }
-
-        public IActionResult RedirectToCreate()
-        {
-            try
-            {
-                ViewBag.Active = "PurchaseOrder";
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Create:Order/Email/CreateEmail";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
+        }        
 
         [HttpGet]
+        [Authorize(Roles = "CreateEmail")]
         public async Task<ViewResult> CreateEmail()
         {
             ViewBag.Active = "PurchaseOrder";
@@ -160,6 +104,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "CreateEmail")]
         public async Task<IActionResult> CreateEmail(EmailViewModel vm)
         {
             ViewBag.Active = "PurchaseOrder";
@@ -187,7 +132,7 @@ namespace PurchasingSystemProduction.Areas.Order.Controllers
 
                 _emailRepository.Tambah(email);
                 TempData["SuccessMessage"] = "Email to " + vm.To + " Saved";
-                return RedirectToAction("RedirectToIndex", "Email");
+                return RedirectToAction("Index", "Email");
             }
 
             return View(vm);

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Repositories
+namespace PurchasingSystem.Areas.MasterData.Repositories
 {
     public class IPositionRepository
     {

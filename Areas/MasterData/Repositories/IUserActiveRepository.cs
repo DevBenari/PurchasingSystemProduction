@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Repositories
+namespace PurchasingSystem.Areas.MasterData.Repositories
 {
     public class IUserActiveRepository
     {

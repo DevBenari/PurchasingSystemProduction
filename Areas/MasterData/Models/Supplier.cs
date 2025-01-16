@@ -1,8 +1,8 @@
-﻿using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Models
+namespace PurchasingSystem.Areas.MasterData.Models
 {
     [Table("MstSupplier", Schema = "dbo")]
     public class Supplier : UserActivity

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Models;
-using static PurchasingSystemProduction.Repositories.AccountRepository;
+using PurchasingSystem.Data;
+using PurchasingSystem.Models;
+using static PurchasingSystem.Repositories.AccountRepository;
 
-namespace PurchasingSystemProduction.Repositories
+namespace PurchasingSystem.Repositories
 {
     public class AccountRepository : IAccountRepository
     {

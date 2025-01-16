@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Repositories;
 
 #nullable disable
 
-namespace PurchasingSystemProduction.Migrations
+namespace PurchasingSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240712092557_initializeLogin")]
@@ -158,7 +158,7 @@ namespace PurchasingSystemProduction.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PurchasingSystemProduction.Models.ApplicationUser", b =>
+            modelBuilder.Entity("PurchasingSystem.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -244,7 +244,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -253,7 +253,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -268,7 +268,7 @@ namespace PurchasingSystemProduction.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -277,7 +277,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)

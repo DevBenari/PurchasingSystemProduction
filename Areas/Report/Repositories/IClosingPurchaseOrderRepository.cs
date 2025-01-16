@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.Report.Models;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.Report.Models;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.Report.Repositories
+namespace PurchasingSystem.Areas.Report.Repositories
 {
     public class IClosingPurchaseOrderRepository
     {

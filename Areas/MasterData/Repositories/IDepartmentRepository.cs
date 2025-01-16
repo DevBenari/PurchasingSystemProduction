@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.MasterData.Repositories
+namespace PurchasingSystem.Areas.MasterData.Repositories
 {
     public class IDepartmentRepository
     {
@@ -86,7 +86,8 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
             {
                 DepartmentId = Department.DepartmentId,
                 DepartmentCode = Department.DepartmentCode,
-                DepartmentName = Department.DepartmentName
+                DepartmentName = Department.DepartmentName,
+                Note = Department.Note
             }).ToListAsync();
         }
 
@@ -101,7 +102,8 @@ namespace PurchasingSystemProduction.Areas.MasterData.Repositories
                 {
                     DepartmentId = Department.DepartmentId,
                     DepartmentCode = Department.DepartmentCode,
-                    DepartmentName = Department.DepartmentName,                    
+                    DepartmentName = Department.DepartmentName,
+                    Note = Department.Note
                 };
                 return DepartmentDetail;
             }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.Repositories
+namespace PurchasingSystem.Areas.Warehouse.Repositories
 {
     public class IWarehouseTransferRepository
     {

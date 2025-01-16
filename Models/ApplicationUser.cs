@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace PurchasingSystemProduction.Models
+namespace PurchasingSystem.Models
 {
     public class ApplicationUser : IdentityUser
     {
@@ -8,5 +8,6 @@ namespace PurchasingSystemProduction.Models
         public string NamaUser { get; set; }
         public bool IsActive { get; set; }
         public bool IsOnline { get; set; }
+        public DateTimeOffset? LastActivityTime { get; set; }
     }
 }

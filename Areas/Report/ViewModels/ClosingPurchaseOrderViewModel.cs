@@ -1,6 +1,6 @@
-﻿using PurchasingSystemProduction.Areas.Report.Models;
+﻿using PurchasingSystem.Areas.Report.Models;
 
-namespace PurchasingSystemProduction.Areas.Report.ViewModels
+namespace PurchasingSystem.Areas.Report.ViewModels
 {
     public class ClosingPurchaseOrderViewModel
     {

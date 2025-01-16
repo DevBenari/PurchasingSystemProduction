@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Data;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Data;
 
-namespace PurchasingSystemProduction.Areas.Transaction.Repositories
+namespace PurchasingSystem.Areas.Transaction.Repositories
 {
     public class IUnitRequestRepository
     {

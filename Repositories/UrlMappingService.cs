@@ -1,4 +1,4 @@
-﻿namespace PurchasingSystemProduction.Repositories
+﻿namespace PurchasingSystem.Repositories
 {
     public class UrlMappingService
     {

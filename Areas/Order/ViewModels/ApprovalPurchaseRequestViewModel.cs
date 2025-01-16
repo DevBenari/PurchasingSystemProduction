@@ -1,6 +1,6 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
+﻿using PurchasingSystem.Areas.Order.Models;
 
-namespace PurchasingSystemProduction.Areas.Order.ViewModels
+namespace PurchasingSystem.Areas.Order.ViewModels
 {
     public class ApprovalPurchaseRequestViewModel
     {

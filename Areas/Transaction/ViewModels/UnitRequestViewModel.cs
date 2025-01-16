@@ -1,6 +1,6 @@
-﻿using PurchasingSystemProduction.Areas.Transaction.Models;
+﻿using PurchasingSystem.Areas.Transaction.Models;
 
-namespace PurchasingSystemProduction.Areas.Transaction.ViewModels
+namespace PurchasingSystem.Areas.Transaction.ViewModels
 {
     public class UnitRequestViewModel
     {

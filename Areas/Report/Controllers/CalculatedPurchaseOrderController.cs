@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Report.Models;
-using PurchasingSystemProduction.Areas.Report.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Report.Models;
+using PurchasingSystem.Areas.Report.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Repositories;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PurchasingSystemProduction.Areas.Report.Controllers
+namespace PurchasingSystem.Areas.Report.Controllers
 {
     [Area("Report")]
     [Route("Report/[Controller]/[Action]")]
@@ -43,36 +45,7 @@ namespace PurchasingSystemProduction.Areas.Report.Controllers
             _urlMappingService = urlMappingService;
         }
 
-        public IActionResult RedirectToIndex(int? month, int? year, string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 50)
-        {
-            try
-            {
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Report/CalculatedPurchaseOrder/Index?month={month}&year={year}&filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-                
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }
-        }
-
+        [Authorize(Roles = "ReadCalculatedPurchaseOrder")]
         public async Task<IActionResult> Index(int? month, int? year, string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 50)
         {
             ViewBag.Active = "Report";
@@ -161,35 +134,7 @@ namespace PurchasingSystemProduction.Areas.Report.Controllers
             return View(model);
         }
 
-        public IActionResult RedirectToClosed(int? month, int? year)
-        {
-            try
-            {
-                // Bangun originalPath
-                string originalPath = $"Page:Report/CalculatedPurchaseOrder/ClosedPurchaseOrder?month={month}&year={year}";                
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Json(new { success = true, encryptedUrl = "/" + guidLikeCode });
-            }
-            catch (Exception ex)
-            {
-                // Log error jika diperlukan
-                Console.WriteLine($"Error: {ex.Message}");
-
-                // Kembalikan JSON untuk fallback
-                return Json(new { success = false, message = "Failed to encrypt URL." });
-            }
-        }
-
+        [Authorize(Roles = "ClosedPurchaseOrder")]
         public async Task<IActionResult> ClosedPurchaseOrder(int? month, int? year)
         {
             ViewBag.Active = "Report";
@@ -243,13 +188,13 @@ namespace PurchasingSystemProduction.Areas.Report.Controllers
                     if (checkMonthPreviousInPO != null && checkMonthPrevious == null)
                     {
                         TempData["WarningMessage"] = "Sorry, the previous month has not been closed yet!";
-                        return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                        return RedirectToAction("Index", "CalculatedPurchaseOrder");
                     }
 
                     if (checkMonthNextInPO != null && checkMonthNext != null)
                     {
                         TempData["WarningMessage"] = "Sorry, the next month has already been closed!";
-                        return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                        return RedirectToAction("Index", "CalculatedPurchaseOrder");
                     }
 
                     //var checkMonthNow = _closingPurchaseOrderRepository.GetAllClosingPurchaseOrder().Where(m => m.Month == month && m.Year == year).FirstOrDefault();
@@ -291,7 +236,7 @@ namespace PurchasingSystemProduction.Areas.Report.Controllers
                                             Status = item.Status,
                                             SupplierName = pod.Supplier,
                                             Qty = item.QtyTotal,
-                                            TotalPrice = Math.Truncate(pod.SubTotal)
+                                            TotalPrice = item.GrandTotal
                                         });
                                     }
                                 }
@@ -323,25 +268,29 @@ namespace PurchasingSystemProduction.Areas.Report.Controllers
 
                             _closingPurchaseOrderRepository.Tambah(cpo);
 
-                            TempData["SuccessMessage"] = "Closed Month " + cpo.Month + " Success...";
-                            return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                            // Misal cpo.Month = 11
+                            string monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(cpo.Month);
+
+                            //TempData["SuccessMessage"] = "Closed Month " + cpo.Month + " Success...";
+                            return Json(new { success = true, message = $"Closed Month {monthName} Success..." });
                         }
                         else
                         {
-                            TempData["WarningMessage"] = "Sorry, there is still a PO status that has not been completed !";
-                            return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                            //TempData["WarningMessage"] = "Sorry, there is still a PO status that has not been completed !";
+                            return Json(new { success = false, message = "Sorry, there is still a PO status that has not been completed !" });
                         }
                     }
                     else
                     {
-                        TempData["WarningMessage"] = "Sorry, that month has been closed !";
-                        return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                        //TempData["WarningMessage"] = "Sorry, that month has been closed !";                        
+                        return Json(new { success = false, message = "Sorry, that month has been closed !" });
+
                     }
                 }                
                 else 
                 {
-                    TempData["WarningMessage"] = "Sorry, data this month empty !";
-                    return RedirectToAction("RedirectToIndex", "CalculatedPurchaseOrder");
+                    //TempData["WarningMessage"] = "Sorry, data this month empty !";
+                    return Json(new { success = false, message = "Sorry, data this month empty !" });                    
                 }
             }
 

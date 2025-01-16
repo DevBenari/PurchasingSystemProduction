@@ -1,8 +1,8 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
+﻿using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.ViewModels
+namespace PurchasingSystem.Areas.Warehouse.ViewModels
 {
     public class ReceiveOrderViewModel
     {
@@ -20,6 +20,7 @@ namespace PurchasingSystemProduction.Areas.Warehouse.ViewModels
         public string WaybillNumber { get; set; }
         [Required(ErrorMessage = "Invoice Number is required !")]
         public string InvoiceNumber { get; set; }
+        public string SenderName { get; set; }
         public string Status { get; set; }
         public string? Note { get; set; }
         public List<ReceiveOrderDetail> ReceiveOrderDetails { get; set; } = new List<ReceiveOrderDetail>();

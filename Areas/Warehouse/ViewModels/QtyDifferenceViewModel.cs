@@ -1,7 +1,7 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
+﻿using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.ViewModels
+namespace PurchasingSystem.Areas.Warehouse.ViewModels
 {
     public class QtyDifferenceViewModel
     {

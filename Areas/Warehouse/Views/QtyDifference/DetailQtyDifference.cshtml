@@ -4,14 +4,14 @@
 }
 
 @using Microsoft.AspNetCore.Identity;
-@using PurchasingSystemProduction.Areas.Warehouse.Models;
+@using PurchasingSystem.Areas.Warehouse.Models;
 
 @{
     var listRole = Context.Session.GetString("ListRole");
     @inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
 
 }
-@model PurchasingSystemProduction.Areas.Warehouse.Models.QtyDifference
+@model PurchasingSystem.Areas.Warehouse.Models.QtyDifference
 
 <!-- Tempusdominus Bootstrap 4 -->
 <link rel="stylesheet" href="~/admin/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
@@ -146,23 +146,37 @@
                 <!-- start button footer -->
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-0"></div>
-                            <div class="col-md-12">
-                                <div class="row">                                    
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Bagian Kiri -->
+                            <div>
+                                <div class="btn btn-default" id="btnbatal" data-href="@Url.Action("Index", "QtyDifference", new { Warehouse = "Warehouse" })">Cancel</div>
+                            </div>
+
+                            <!-- Bagian Kanan -->
+                            <div>
+                                @if (User.Identity.Name == "superadmin@admin.com")
+                                {
+                                    <a class="btn bg-gray" asp-action="PreviewQtyDifference" asp-controller="QtyDifference" asp-area="Warehouse" asp-route-id="@Model.QtyDifferenceId" target="_blank"><i class="fas fa-file-pdf" style="color:white"></i> Preview</a>
+                                    <a class="btn bg-indigo" asp-action="DownloadQtyDifference" asp-controller="QtyDifference" asp-area="Warehouse" asp-route-id="@Model.QtyDifferenceId"><i class="fas fa-download" style="color:white"></i> Download</a>
+                                }
+                                else
+                                {
                                     @if (!string.IsNullOrEmpty(listRole))
                                     {
                                         var roles = listRole.Split(',');
-                                        if (roles.Contains("PrintQtyDifference"))
+                                        if (roles.Contains("PreviewQtyDifference"))
                                         {
-                                            <a class="btn bg-gray" asp-action="PrintQtyDifference" asp-controller="QtyDifference" asp-area="Warehouse" asp-route-id="@Model.QtyDifferenceId"><i class="far fa-file-alt" style="color:white"></i> Save As PDF</a>
+                                            <a class="btn bg-gray" asp-action="PreviewQtyDifference" asp-controller="QtyDifference" asp-area="Warehouse" asp-route-id="@Model.QtyDifferenceId" target="_blank"><i class="fas fa-file-pdf" style="color:white"></i> Preview</a>
+                                        }
+
+                                        if (roles.Contains("DownloadQtyDifference"))
+                                        {
+                                            <a class="btn bg-indigo" asp-action="DownloadQtyDifference" asp-controller="QtyDifference" asp-area="Warehouse" asp-route-id="@Model.QtyDifferenceId"><i class="fas fa-download" style="color:white"></i> Download</a>
                                         }
                                     }
-                                    <div class="btn btn-default" id="btnbatal" data-href="@Url.Action("RedirectToIndex", "QtyDifference", new { area = "Warehouse" })">Cancel</div>                                    
-                                </div>
+                                }                                
                             </div>
-                            <div class="col-md-0"></div>
-                        </div>
+                        </div>                        
                     </div>
                 </div>
                 <!-- /.end button footer -->

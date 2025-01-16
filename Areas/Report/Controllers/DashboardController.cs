@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Repositories;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PurchasingSystemProduction.Areas.Report.Controllers
+namespace PurchasingSystem.Areas.Report.Controllers
 {
     [Area("Report")]
     [Route("Report/[Controller]/[Action]")]

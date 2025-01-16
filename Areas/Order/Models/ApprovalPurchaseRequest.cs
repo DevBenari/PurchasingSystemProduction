@@ -1,10 +1,10 @@
-﻿using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.Order.Models
+namespace PurchasingSystem.Areas.Order.Models
 {
     [Table("OrdApprovalPurchaseRequest", Schema = "dbo")]
     public class ApprovalPurchaseRequest : UserActivity

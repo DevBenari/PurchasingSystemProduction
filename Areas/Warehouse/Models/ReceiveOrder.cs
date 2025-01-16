@@ -1,10 +1,10 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.Models
+namespace PurchasingSystem.Areas.Warehouse.Models
 {
     [Table("WrhReceiveOrder", Schema = "dbo")]
     public class ReceiveOrder : UserActivity
@@ -19,6 +19,7 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Models
         public string DeliveryDate { get; set; }
         public string WaybillNumber { get; set; }
         public string InvoiceNumber { get; set; }
+        public string SenderName { get; set; }
         public string Status { get; set; }
         public string? Note { get; set; }        
         public List<ReceiveOrderDetail> ReceiveOrderDetails { get; set; } = new List<ReceiveOrderDetail>();

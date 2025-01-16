@@ -1,10 +1,10 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+﻿using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PurchasingSystemProduction.Areas.Report.Models
+namespace PurchasingSystem.Areas.Report.Models
 {
     [Table("RptClosingPurchaseOrder", Schema = "dbo")]
     public class ClosingPurchaseOrder : UserActivity

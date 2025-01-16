@@ -1,13 +1,14 @@
 ﻿@{
+    var listRole = Context.Session.GetString("ListRole");
     ViewData["Title"] = "Detail Closed Purchase Order";
     Layout = "~/Views/Shared/_TopNavbarReportPurchaseOrder.cshtml";
 }
 
 @using Microsoft.AspNetCore.Identity;
-@using PurchasingSystemProduction.Areas.Report.Models;
+@using PurchasingSystem.Areas.Report.Models;
 
 @inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
-@model PurchasingSystemProduction.Areas.Report.Models.ClosingPurchaseOrder
+@model PurchasingSystem.Areas.Report.Models.ClosingPurchaseOrder
 
 <!-- Main content -->
 <section class="content">
@@ -27,7 +28,7 @@
                     }
 
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" asp-for="ClosingPurchaseOrderNumber">No. Closing Purchase Order</label>
+                        <label class="col-sm-2 col-form-label" asp-for="ClosingPurchaseOrderNumber">Closing Number</label>
                         <div class="col-sm-10">
                             <input type="text" asp-for="ClosingPurchaseOrderNumber" class="form-control form-control-border border-width-2" id="ClosingPurchaseOrderNumber" placeholder="Nomor Receive" readonly disabled>
                         </div>
@@ -62,13 +63,13 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" asp-for="TotalQty">TotalQty</label>
+                        <label class="col-sm-2 col-form-label" asp-for="TotalQty">Sub Total Qty</label>
                         <div class="col-sm-10">
                             <input type="text" asp-for="TotalQty" class="form-control form-control-border border-width-2" id="TotalQty" placeholder="Total Qty" disabled>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" asp-for="GrandTotal">GrandTotal</label>
+                        <label class="col-sm-2 col-form-label" asp-for="GrandTotal">Grand Total</label>
                         <div class="col-sm-10">
                             <input type="text" asp-for="GrandTotal" class="form-control form-control-border border-width-2" id="GrandTotal" placeholder="Grand Total" disabled>
                         </div>
@@ -88,10 +89,10 @@
                                         <th class="text-center" style="background-color:#7FB9EE"><div style="color:#ffffff">No</div></th>
                                         <th class="text-left" style="background-color:#7FB9EE"><div style="color:#ffffff">Purchase Order Number</div></th>
                                         <th class="text-left" style="background-color:#7FB9EE"><div style="color:#ffffff">Term Of Payment Name</div></th>
-                                        <th class="text-left" style="background-color:#7FB9EE"><div style="color:#ffffff">Status</div></th>
+                                        <th class="text-left" style="background-color:#7FB9EE"><div style="color:#ffffff">Receive Order Number</div></th>
                                         <th class="text-center" style="background-color:#7FB9EE"><div style="color:#ffffff">Supplier Name</div></th>
-                                        <th class="text-center" style="background-color:#7FB9EE"><div style="color:#ffffff">Qty</div></th>
-                                        <th class="text-right" style="background-color:#7FB9EE"><div style="color:#ffffff">Total Price</div></th>
+                                        <th class="text-center" style="background-color:#7FB9EE"><div style="color:#ffffff">Total Qty</div></th>
+                                        <th class="text-right" style="background-color:#7FB9EE"><div style="color:#ffffff">Sub Total Price</div></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,7 +119,37 @@
                 <!-- start button footer -->
                 <div class="card card-orange">
                     <div class="card-body">
-                        <div class="btn btn-default" data-href="@Url.Action("RedirectToIndex", "ClosedPurchaseOrder", new { area = "Report" })">Cancel</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Bagian Kiri -->
+                            <div>
+                                <div class="btn btn-default" data-href="@Url.Action("Index", "ClosedPurchaseOrder", new { area = "Report" })">Cancel</div>
+                            </div>
+
+                            <!-- Bagian Kanan -->
+                            <div>
+                                @if (User.Identity.Name == "superadmin@admin.com")
+                                {
+                                    <a class="btn bg-gray" asp-action="PreviewClosingPurchaseOrder" asp-controller="ClosedPurchaseOrder" asp-area="Report" asp-route-id="@Model.ClosingPurchaseOrderId" target="_blank"><i class="fas fa-file-pdf" style="color:white"></i> Preview</a>
+                                    <a class="btn bg-indigo" asp-action="DownloadClosingPurchaseOrder" asp-controller="ClosedPurchaseOrder" asp-area="Report" asp-route-id="@Model.ClosingPurchaseOrderId"><i class="fas fa-download" style="color:white"></i> Download</a>
+                                }
+                                else
+                                {
+                                    @if (!string.IsNullOrEmpty(listRole))
+                                    {
+                                        var roles = listRole.Split(',');
+                                        if (roles.Contains("PreviewClosingPurchaseOrder"))
+                                        {
+                                            <a class="btn bg-gray" asp-action="PreviewClosingPurchaseOrder" asp-controller="ClosedPurchaseOrder" asp-area="Report" asp-route-id="@Model.ClosingPurchaseOrderId" target="_blank"><i class="fas fa-file-pdf" style="color:white"></i> Preview</a>
+                                        }
+
+                                        if (roles.Contains("DownloadClosingPurchaseOrder"))
+                                        {
+                                            <a class="btn bg-indigo" asp-action="DownloadClosingPurchaseOrder" asp-controller="ClosedPurchaseOrder" asp-area="Report" asp-route-id="@Model.ClosingPurchaseOrderId"><i class="fas fa-download" style="color:white"></i> Download</a>
+                                        }                                       
+                                    }
+                                }                                
+                            </div>
+                        </div>                        
                     </div>
                 </div>
                 <!-- /.end button footer -->

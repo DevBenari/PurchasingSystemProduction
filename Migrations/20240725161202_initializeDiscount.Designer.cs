@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Repositories;
 
 #nullable disable
 
-namespace PurchasingSystemProduction.Migrations
+namespace PurchasingSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240725161202_initializeDiscount")]
@@ -158,7 +158,7 @@ namespace PurchasingSystemProduction.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PurchasingSystemProduction.Areas.MasterData.Models.Discount", b =>
+            modelBuilder.Entity("PurchasingSystem.Areas.MasterData.Models.Discount", b =>
                 {
                     b.Property<Guid>("DiscountId")
                         .ValueGeneratedOnAdd()
@@ -204,7 +204,7 @@ namespace PurchasingSystemProduction.Migrations
                     b.ToTable("MstDiscount", "dbo");
                 });
 
-            modelBuilder.Entity("PurchasingSystemProduction.Areas.MasterData.Models.Principal", b =>
+            modelBuilder.Entity("PurchasingSystem.Areas.MasterData.Models.Principal", b =>
                 {
                     b.Property<Guid>("PrincipalId")
                         .ValueGeneratedOnAdd()
@@ -262,7 +262,7 @@ namespace PurchasingSystemProduction.Migrations
                     b.ToTable("MstPrincipal", "dbo");
                 });
 
-            modelBuilder.Entity("PurchasingSystemProduction.Areas.MasterData.Models.UserActive", b =>
+            modelBuilder.Entity("PurchasingSystem.Areas.MasterData.Models.UserActive", b =>
                 {
                     b.Property<Guid>("UserActiveId")
                         .ValueGeneratedOnAdd()
@@ -335,7 +335,7 @@ namespace PurchasingSystemProduction.Migrations
                     b.ToTable("MstUserActive", "dbo");
                 });
 
-            modelBuilder.Entity("PurchasingSystemProduction.Models.ApplicationUser", b =>
+            modelBuilder.Entity("PurchasingSystem.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -421,7 +421,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -430,7 +430,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -445,7 +445,7 @@ namespace PurchasingSystemProduction.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -454,7 +454,7 @@ namespace PurchasingSystemProduction.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("PurchasingSystemProduction.Models.ApplicationUser", null)
+                    b.HasOne("PurchasingSystem.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace PurchasingSystemProduction.Migrations
+namespace PurchasingSystem.Migrations
 {
     public partial class updateWarehouseLocationNoPerson2 : Migration
     {

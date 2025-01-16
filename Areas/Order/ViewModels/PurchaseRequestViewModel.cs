@@ -1,7 +1,7 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
+﻿using PurchasingSystem.Areas.Order.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace PurchasingSystemProduction.Areas.Order.ViewModels
+namespace PurchasingSystem.Areas.Order.ViewModels
 {
     public class PurchaseRequestViewModel
     {

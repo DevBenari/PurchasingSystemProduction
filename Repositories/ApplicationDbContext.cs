@@ -2,14 +2,15 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PurchasingSystemProduction.Areas.MasterData.Models;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Report.Models;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Models;
+using PurchasingSystem.Areas.Administrator.Models;
+using PurchasingSystem.Areas.MasterData.Models;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Report.Models;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Models;
 
-namespace PurchasingSystemProduction.Data;
+namespace PurchasingSystem.Data;
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -53,6 +54,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<WarehouseTransferDetail> WarehouseTransferDetails { get; set; }
     public DbSet<QtyDifference> QtyDifferences { get; set; }
     public DbSet<QtyDifferenceDetail> QtyDifferenceDetails { get; set; }
+    public DbSet<ProductReturn> ProductReturns { get; set; }
+    public DbSet<ProductReturnDetail> ProductReturnDetails { get; set; }
+    public DbSet<ApprovalProductReturn> ApprovalProductReturns { get; set; }
     #endregion
 
     #region Areas Unit Request

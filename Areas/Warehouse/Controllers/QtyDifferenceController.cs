@@ -10,22 +10,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSystemProduction.Areas.MasterData.Repositories;
-using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Order.Repositories;
-using PurchasingSystemProduction.Areas.Transaction.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Models;
-using PurchasingSystemProduction.Areas.Warehouse.Repositories;
-using PurchasingSystemProduction.Data;
-using PurchasingSystemProduction.Hubs;
-using PurchasingSystemProduction.Models;
-using PurchasingSystemProduction.Repositories;
+using PurchasingSystem.Areas.MasterData.Repositories;
+using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Order.Repositories;
+using PurchasingSystem.Areas.Transaction.Models;
+using PurchasingSystem.Areas.Warehouse.Models;
+using PurchasingSystem.Areas.Warehouse.Repositories;
+using PurchasingSystem.Data;
+using PurchasingSystem.Hubs;
+using PurchasingSystem.Models;
+using PurchasingSystem.Repositories;
+using QRCoder;
 using System.Data;
+using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
+namespace PurchasingSystem.Areas.Warehouse.Controllers
 {
     [Area("Warehouse")]
     [Route("Warehouse/[Controller]/[Action]")]
@@ -95,42 +97,36 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
             _configuration = configuration;
         }
 
-        [NonAction]
         public JsonResult LoadProduk(Guid Id)
         {
             var produk = _applicationDbContext.Products.Include(p => p.Supplier).Include(s => s.Measurement).Include(d => d.Discount).Where(p => p.ProductId == Id).FirstOrDefault();
             return new JsonResult(produk);
         }
 
-        [NonAction]
         public JsonResult LoadPosition1(Guid Id)
         {
             var position = _applicationDbContext.Positions.Where(p => p.DepartmentId == Id).ToList();
             return Json(new SelectList(position, "PositionId", "PositionName"));
         }
 
-        [NonAction]
         public JsonResult LoadPosition2(Guid Id)
         {
             var position = _applicationDbContext.Positions.Where(p => p.DepartmentId == Id).ToList();
             return Json(new SelectList(position, "PositionId", "PositionName"));
         }
 
-        [NonAction]
         public JsonResult LoadUser1(Guid Id)
         {
             var user = _applicationDbContext.UserActives.Where(p => p.PositionId == Id).ToList();
             return Json(new SelectList(user, "UserActiveId", "FullName"));
         }
 
-        [NonAction]
         public JsonResult LoadUser2(Guid Id)
         {
             var user = _applicationDbContext.UserActives.Where(p => p.PositionId == Id).ToList();
             return Json(new SelectList(user, "UserActiveId", "FullName"));
         }
 
-        [NonAction]
         public JsonResult LoadPurchaseOrder(Guid Id)
         {
             var podetail = _applicationDbContext.PurchaseOrders
@@ -139,46 +135,15 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
             return new JsonResult(podetail);
         }
 
-        [NonAction]
         public JsonResult LoadPurchaseOrderDetail(Guid Id)
         {
             var podetail = _applicationDbContext.PurchaseOrderDetails
                 .Where(p => p.PurchaseOrderDetailId == Id).FirstOrDefault();
             return new JsonResult(podetail);
         }
-
-        public IActionResult RedirectToIndex(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                ViewBag.Active = "QtyDifference";
-                // Format tanggal tanpa waktu
-                string startDateString = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : "";
-                string endDateString = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : "";
-
-                // Bangun originalPath dengan format tanggal ISO 8601
-                string originalPath = $"Page:Warehouse/QtyDifference/Index?filterOptions={filterOptions}&searchTerm={searchTerm}&startDate={startDateString}&endDate={endDateString}&page={page}&pageSize={pageSize}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "ReadQtyDifference")]
         public async Task<IActionResult> Index(string filterOptions = "", string searchTerm = "", DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, int page = 1, int pageSize = 10)
         {
             ViewBag.Active = "QtyDifference";
@@ -224,35 +189,9 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
 
             return View(model);
         }
-
-        public IActionResult RedirectToCreate()
-        {
-            try
-            {
-                ViewBag.Active = "QtyDifference";
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Create:Warehouse/QtyDifference/CreateQtyDifference";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "CreateQtyDifference")]
         public async Task<IActionResult> CreateQtyDifference(string poList)
         {
             ViewBag.Active = "QtyDifference";
@@ -300,6 +239,7 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "CreateQtyDifference")]
         public async Task<IActionResult> CreateQtyDifference(QtyDifference model)
         {
             ViewBag.Active = "QtyDifference";            
@@ -426,35 +366,9 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
                 return View(model);
             }
         }
-
-        public IActionResult RedirectToDetail(Guid Id)
-        {
-            try
-            {
-                ViewBag.Active = "QtyDifference";
-                // Enkripsi path URL untuk "Index"
-                string originalPath = $"Detail:Warehouse/QtyDifference/DetailQtyDifference/{Id}";
-                string encryptedPath = _protector.Protect(originalPath);
-
-                // Hash GUID-like code (SHA256 truncated to 36 characters)
-                string guidLikeCode = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(encryptedPath)))
-                    .Replace('+', '-')
-                    .Replace('/', '_')
-                    .Substring(0, 36);
-
-                // Simpan mapping GUID-like code ke encryptedPath di penyimpanan sementara (misalnya, cache)
-                _urlMappingService.InMemoryMapping[guidLikeCode] = encryptedPath;
-
-                return Redirect("/" + guidLikeCode);
-            }
-            catch
-            {
-                // Jika enkripsi gagal, kembalikan view
-                return Redirect(Request.Path);
-            }            
-        }
-
+        
         [HttpGet]
+        [Authorize(Roles = "UpdateQtyDifference")]
         public async Task<IActionResult> DetailQtyDifference(Guid Id)
         {
             ViewBag.Active = "QtyDifference";
@@ -497,7 +411,8 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> PrintQtyDifference(Guid Id)
+        [Authorize(Roles = "PreviewQtyDifference")]
+        public async Task<IActionResult> PreviewQtyDifference(Guid Id)
         {
             var qtyDifference = await _qtyDifferenceRepository.GetQtyDifferenceById(Id);
 
@@ -508,9 +423,85 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
             var UserApprove2 = qtyDifference.UserApprove2.FullName;
             var Note = qtyDifference.Note;
 
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(QdNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
+            // Load laporan ke FastReport
             WebReport web = new WebReport();
             var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\CancelPurchaseOrder.frx";
             web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
+
+            var msSqlDataConnection = new MsSqlDataConnection();
+            msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
+            var Conn = msSqlDataConnection.ConnectionString;
+
+            web.Report.SetParameterValue("Conn", Conn);
+            web.Report.SetParameterValue("QtyDifferenceId", Id.ToString());
+            web.Report.SetParameterValue("QdNumber", QdNumber);
+            web.Report.SetParameterValue("PoNumber", PoNumber);
+            web.Report.SetParameterValue("CreateDate", CreateDate);
+            web.Report.SetParameterValue("UserApprove1", UserApprove1);
+            web.Report.SetParameterValue("UserApprove2", UserApprove2);
+            web.Report.SetParameterValue("Note", Note);
+
+            Stream stream = new MemoryStream();
+
+            web.Report.Prepare();
+            web.Report.Export(new PDFSimpleExport(), stream);
+            stream.Position = 0;
+
+            return File(stream, "application/pdf");
+        }
+
+        [Authorize(Roles = "DownloadQtyDifference")]
+        public async Task<IActionResult> DownloadQtyDifference(Guid Id)
+        {
+            var qtyDifference = await _qtyDifferenceRepository.GetQtyDifferenceById(Id);
+
+            var CreateDate = qtyDifference.CreateDateTime.ToString("dd MMMM yyyy");
+            var QdNumber = qtyDifference.QtyDifferenceNumber;
+            var PoNumber = qtyDifference.PurchaseOrder.PurchaseOrderNumber;
+            var UserApprove1 = qtyDifference.UserApprove1.FullName;
+            var UserApprove2 = qtyDifference.UserApprove2.FullName;
+            var Note = qtyDifference.Note;
+
+            // Path logo untuk QR code
+            var logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+
+            // Generate QR Code dengan logo
+            var qrCodeImage = GenerateQRCodeWithLogo(QdNumber, logoPath);
+
+            // Simpan QR Code ke dalam MemoryStream sebagai PNG
+            using var qrCodeStream = new MemoryStream();
+            qrCodeImage.Save(qrCodeStream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeStream.Position = 0;
+
+            // Load laporan ke FastReport
+            WebReport web = new WebReport();
+            var path = $"{_webHostEnvironment.WebRootPath}\\Reporting\\CancelPurchaseOrder.frx";
+            web.Report.Load(path);
+
+            // Tambahkan data QR Code sebagai PictureObject
+            var pictureObject = web.Report.FindObject("Picture1") as FastReport.PictureObject;
+            if (pictureObject != null)
+            {
+                pictureObject.Image = Image.FromStream(qrCodeStream);
+            }
 
             var msSqlDataConnection = new MsSqlDataConnection();
             msSqlDataConnection.ConnectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -526,10 +517,52 @@ namespace PurchasingSystemProduction.Areas.Warehouse.Controllers
             web.Report.SetParameterValue("Note", Note);
 
             web.Report.Prepare();
+
             Stream stream = new MemoryStream();
             web.Report.Export(new PDFSimpleExport(), stream);
             stream.Position = 0;
+
             return File(stream, "application/zip", (QdNumber + ".pdf"));
+        }
+
+        private Bitmap GenerateQRCodeWithLogo(string text, string logoPath)
+        {
+            if (!System.IO.File.Exists(logoPath))
+            {
+                throw new FileNotFoundException("Logo file not found", logoPath);
+            }
+
+            // Step 1: Generate QR code as byte array using PngByteQRCode
+            using var qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.H);
+            using var qrCode = new PngByteQRCode(qrCodeData);
+            byte[] qrCodeBytes = qrCode.GetGraphic(4);
+
+            // Step 2: Load QR code byte array into Bitmap
+            Bitmap qrBitmap;
+            using (var ms = new MemoryStream(qrCodeBytes))
+            {
+                qrBitmap = new Bitmap(ms);
+            }
+
+            // Step 3: Ensure QR code is in a writable pixel format
+            Bitmap writableQrBitmap = new Bitmap(qrBitmap.Width, qrBitmap.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                graphics.DrawImage(qrBitmap, 0, 0);
+            }
+
+            // Step 4: Load logo and add it to the QR code
+            using var logoBitmap = new Bitmap(logoPath);
+            using (var graphics = Graphics.FromImage(writableQrBitmap))
+            {
+                int logoSize = (writableQrBitmap.Width + 125) / 5; // Logo size (20% of QR code size)
+                int x = (writableQrBitmap.Width - logoSize) / 2;
+                int y = (writableQrBitmap.Height - logoSize) / 2;
+                graphics.DrawImage(logoBitmap, new Rectangle(x, y, logoSize, logoSize));
+            }
+
+            return writableQrBitmap;
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using PurchasingSystemProduction.Areas.Order.Models;
-using PurchasingSystemProduction.Areas.Transaction.Models;
+﻿using PurchasingSystem.Areas.Order.Models;
+using PurchasingSystem.Areas.Transaction.Models;
 
-namespace PurchasingSystemProduction.Areas.Warehouse.ViewModels
+namespace PurchasingSystem.Areas.Warehouse.ViewModels
 {
     public class ApprovalUnitRequestViewModel
     {
